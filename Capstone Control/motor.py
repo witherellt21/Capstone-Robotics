@@ -27,4 +27,3 @@ class Motor(Servo):
     def stop(self):
         "Stops motor movement"
         self.servo.detach()
-

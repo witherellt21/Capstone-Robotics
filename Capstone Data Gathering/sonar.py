@@ -1,102 +1,56 @@
-
-
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
 #Libraries
 import RPi.GPIO as GPIO
 import time
 
-#GPIO Mode (BOARD / BCM)
-GPIO.setmode(GPIO.BCM)
+class Sonar():
 
-#set GPIO Pins
-GPIO_TRIGGER = 18
-GPIO_ECHO = 24
+    def __init__(self, trigger_pin, echo_pin):
+        #GPIO Mode (BOARD / BCM)
+        GPIO.setmode(GPIO.BCM)
 
-#set GPIO direction (IN / OUT)
-GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
-GPIO.setup(GPIO_ECHO, GPIO.IN)
+        #set GPIO Pins
+        self.trigger = trigger_pin
+        self.echo = echo_pin
 
-def distance():
-    # set Trigger to HIGH
-    GPIO.output(GPIO_TRIGGER, True)
+        #set GPIO direction (IN / OUT)
+        GPIO.setup(self.trigger, GPIO.OUT)
+        GPIO.setup(self.echo, GPIO.IN)
 
-    # set Trigger after 0.01ms to LOW
-    time.sleep(0.00001)
-    GPIO.output(GPIO_TRIGGER, False)
+    def distance(self):
+        # set Trigger to HIGH
+        GPIO.output(self.trigger, True)
 
-    StartTime = time.time()
-    StopTime = time.time()
+        # set Trigger after 0.01ms to LOW
+        time.sleep(0.00001)
+        GPIO.output(self.trigger, False)
 
-    # save StartTime
-    while GPIO.input(GPIO_ECHO) == 0:
         StartTime = time.time()
-
-    # save time of arrival
-    while GPIO.input(GPIO_ECHO) == 1:
         StopTime = time.time()
 
-    # time difference between start and arrival
-    TimeElapsed = StopTime - StartTime
-    # multiply with the sonic speed (34300 cm/s)
-    # and divide by 2, because there and back
-    distance = (TimeElapsed * 34300*0.3937008) / 2
+        # save StartTime
+        while GPIO.input(self.echo) == 0:
+            StartTime = time.time()
 
-    return distance
+        # save time of arrival
+        while GPIO.input(self.echo) == 1:
+            StopTime = time.time()
+
+        # time difference between start and arrival
+        TimeElapsed = StopTime - StartTime
+        # multiply with the sonic speed (34300 cm/s)
+        # and divide by 2, because there and back
+        distance = (TimeElapsed * 34300*0.3937008) / 2
+
+        return distance
+
+
+'''
+s = Sonar()
 
 if __name__ == '__main__':
     try:
         while True:
-            dist = distance()
+            dist = s.distance()
             print ("Measured Distance = %.1f in" % dist)
             time.sleep(1)
 
@@ -104,3 +58,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
+'''

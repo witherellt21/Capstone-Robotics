@@ -5,7 +5,7 @@ Description: Main loop for robot to send and receive data.
 '''
 
 from client import Client
-#from sonar import Sonar
+from sonar import Sonar
 import pygame
 import time
 
@@ -13,7 +13,7 @@ import time
 client = Client()
 
 # Set the client to the server's IP and PORT address
-client.IP = '192.168.0.2'
+client.IP = '192.168.0.21'
 client.PORT = 1234
 
 client.connect()
@@ -38,7 +38,7 @@ print(joysticks)
 
 
 # ---------------- Initialize Sonar -----------------
-#s = Sonar(18, 24)
+s = Sonar(18, 24)
 
 running = True
 while running:
@@ -46,8 +46,7 @@ while running:
     counter += 1
 
     screen.fill((0,0,0))
-    
-    '''
+
     #if counter == 10:
     dist = round(s.distance(), 3)
     time.sleep(.1)
@@ -55,11 +54,10 @@ while running:
     print(msg)
     counter = 0
     client.send(msg)
-    '''
 
     pygame.display.update()
 
-    client.receive()
+    #client.receive()
 
 
 pygame.quit()

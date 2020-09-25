@@ -6,12 +6,11 @@ Description: Contains client class for connecting to a host server and establish
 
 import socket
 
-
 class Client():
 
     def __init__(self):
-        self.IP = '192.168.0.21'
-        self.PORT = 1234
+        self.IP = ''
+        self.PORT = None
         self.s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 
     def connect( self ):
@@ -23,4 +22,4 @@ class Client():
     def receive( self ):
         msg = self.s.recv(1024)
         message = msg.decode(("utf-8"))
-        print(message)
+        #print(message)
