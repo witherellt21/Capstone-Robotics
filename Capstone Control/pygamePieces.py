@@ -58,6 +58,20 @@ class Robot():
                 return 'right'
                 #self.displayWarningRight()
 
+    def displayWarnings(self, barrier):
+        direction = self.getDirection(barrier)
+        if direction != None:
+            distance = self.getDistance(barrier, direction)
+            if distance < 100:
+                if direction == 'up':
+                    self.displayWarningUp(distance)
+                if direction == 'down':
+                    self.displayWarningDown(distance)
+                if direction == 'right':
+                    self.displayWarningRight(distance)
+                if direction == 'left':
+                    self.displayWarningLeft(distance)
+
     def displayWarningUp(self, distance):
         if distance < 40:
             pygame.draw.rect(self.screen, (255, 0, 0), (self.x - self.width/2, self.y - 23, 20, 5),0)

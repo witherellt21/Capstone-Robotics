@@ -162,31 +162,6 @@ x_change = 0
 
 barrierList = []
 
-joysticks = []
-
-pygame.joystick.init()
-
-for i in range(pygame.joystick.get_count()):
-    joysticks.append(pygame.joystick.Joystick(i))
-    joysticks[-1].init()
-
-
-for j in joysticks:
-    print(j.get_numbuttons())
-    print(j.get_numhats())
-
-LEFT_X = 0
-LEFT_Y = 1
-RIGHT_X = 3
-RIGHT_Y = 4
-
-fl = Motor(4)
-##fr = Motor(17)
-#br = Motor(22)
-#bl = Motor(27)
-
-#robot = Automobile(fr, br, fl, bl)
-
 running = True
 while running:
 
