@@ -14,8 +14,9 @@ class Receiver():
         self.server.start()
         self.server.receiveConnection()
 
-    def receive(self, msg):
-        #msg = self.server.receive()
+    def receive(self):
+        msg = self.server.receive()
+        self.datalist = []
         #msg = 'accel = 20, sonar = 30, temp = 70'
         if not msg == None:
             #print(msg)
@@ -27,15 +28,28 @@ class Receiver():
         self.server.send(string)
 
     def separateData(self, msg):
-        self.datalist = msg.split(',')
+        self.datalist = msg.split(',,')
 
-    def getIMU(self, last):
+    def getTemp(self, last):
         for data in self.datalist:
-            if 'IMU' in data:
+            if 'temp' in data:
                 try: return float(data.split('=')[1].strip())
                 except: return last
         return last
 
+    def getAccel(self, last):
+        for data in self.datalist:
+            if 'accel' in data.strip(' '):
+                try: return data.split('=')[1].strip()
+                except: return last
+        return last
+                
+    def getGyro(self, last):
+        for data in self.datalist:
+            if 'gyro' in data:
+                try: return data.split('=')[1].strip()
+                except: return last
+        return last
 
     def getSonar(self, last):
         for data in self.datalist:
@@ -43,17 +57,6 @@ class Receiver():
                 try: return float(data.split('=')[1].strip())
                 except: return last
         return last
-
-
-    def getAccel(self, last):
-        for data in self.datalist:
-            if 'accel' in data:
-                try: return float(data.split('=')[1].strip())
-                except: return last
-        return last
-
-        #if len(self.datalist) > 0:
-            #return self.datalist[0].strip()
 
     def getAllData(self):
         if len(self.datalist) > 2:
