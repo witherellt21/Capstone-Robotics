@@ -31,7 +31,7 @@ counter = 0
 print('start')
 s = Sonar(18, 24)
 imu = IMU()
-msg = []
+msg = ""
 
 running = True
 while running:
@@ -47,12 +47,9 @@ while running:
     if ag_data_ready:
         temp, acc, gyro = imu.read_ag()
 
-    time.sleep(.1)
+    time.sleep(.3)
 
-    msg.append("sonar = " + str(dist))
-    msg.append("temp = " + str(temp))
-    msg.append("acc = " + str(acc))
-    msg.append("gyro = " + str(gyro))
+    msg = "sonar = " + str(dist) + ",, temp = " + str(temp) + ",, accel = " + str(acc)+ ",, gyro = " + str(gyro)
     print(str(msg))
     #ounter = 0
     client.send(msg)
@@ -63,7 +60,7 @@ while running:
     #if counter == 100:
         #running = False
 
-    msg = []
+    msg = ""
 
 print('done')
 #pygame.quit()

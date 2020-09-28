@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from lsm9ds1_rjg import Driver, I2CTransport, SPITransport
 
 
-class SimpleExample:
+class IMU():
     """This example shows how to poll the sensor for new data.
     It queries the sensor to discover when the accelerometer/gyro
     has new data and then reads all the sensors."""
@@ -41,12 +41,9 @@ class SimpleExample:
                 '''
     def read_ag(self):
         temp, acc, gyro = self.driver.read_ag_data()
-        print('Temp:{} Acc:{} Gryo:{}'.format(temp, acc, gyro))
+        #print('Temp:{} Acc:{} Gryo:{}'.format(temp, acc, gyro))
+        return temp, acc, gyro
 
     def read_magnetometer(self):
         mag = self.driver.read_magnetometer()
         print('Mag {}'.format(mag))
-
-
-if __name__ == '__main__':
-    SimpleExample().main()
