@@ -3,6 +3,7 @@ import time
 import pygame
 import math
 from pygamePieces import Robot, Barrier
+from xboxControl import Controller
 
 pygame.init()
 screen = pygame.display.set_mode((1700, 900))
@@ -28,7 +29,9 @@ x_change = 0
 
 barrierList = []
 
-pygame.joystick.init()
+c = Controller()
+angle = 0
+rotation = ''
 
 
 running = True
@@ -44,7 +47,18 @@ while running:
             # 1 = B
             # 2 = X
             # 3 = Y
+            # Left Bumper = 4
+            # Right Bumper = 5
             print(event.button)
+            if event.button == 4:
+                rotation = 'left'
+            elif event.button == 5:
+                rotation = 'right'
+        if event.type == pygame.JOYBUTTONUP:
+            if event.button == 4:
+                rotation = ''
+            elif event.button == 5:
+                rotation = ''
 
         if event.type == pygame.JOYHATMOTION:
             if event.value[0] == 1:
@@ -52,35 +66,27 @@ while running:
             if event.value[0] == -1:
                 print('yo')
 
-    for j in joysticks:
-        x_change = j.get_axis(LEFT_X)
-        y_change = j.get_axis(LEFT_Y)
-        if abs(x_change) <= 0.1:
-            x_change = 0
-        if abs(y_change) <= 0.1:
-            y_change = 0
+    x_change = c.joystick.get_axis(c.LEFT_X)
+    y_change = c.joystick.get_axis(c.LEFT_Y)
+    if abs(x_change) <= 0.1:
+        x_change = 0
+    if abs(y_change) <= 0.1:
+        y_change = 0
 
         #j.get_axis(RIGHT_X)
         #j.get_axis(RIGHT_Y)
 
-    print(y_change)
+    if rotation == 'left':
+        angle += 0.4
+    elif rotation == 'right':
+        angle -= 0.4
 
-    robot.y += y_change
-    robot.x += x_change
 
-    if x_change > 0:
-        pass
-        #fl.left()
-    if y_change > 0:
-        fl.backward()
-    elif y_change < 0:
-        fl.forward()
-    else:
-        fl.stop()
-
+    robot.y += y_change * math.cos(math.pi*angle/180)
+    robot.x += y_change * math.sin(math.pi*angle/180)
 
     drawDivider(945, 0, (255, 255, 255))
-    robot.draw()
+    robot.draw(angle)
 
     barrierX = 740
     barrierY = 700
@@ -88,6 +94,19 @@ while running:
     #barrierX = 780
     #barrierY = 600
 
+     # making a copy of the old center of the rectangle
+    old_center = robot.center
+    # defining angle of the rotation
+    #rot = (rot + rot_speed) % 360
+
+    # rotating the orignal image
+    #new_image = pygame.transform.rotate(robot.surface , rot)
+    # set the rotated rectangle to the old center
+    #rect.center = old_center
+    # drawing the rotated rectangle to the screen
+    #screen.blit(new_image , rect)
+
+    '''
     if not barrierExists(barrierList, barrierX, barrierY):
         barrier = Barrier(screen, barrierX, barrierY, 5, 5)
         #barrier = Barrier(screen, barrierX, barrierY, 10, 40)
@@ -102,7 +121,7 @@ while running:
             #robot.getDirection(barrier, d)
         #if isCollision(robot.x, robot.y, barrier.x, barrier.y):
         #    displayWarningUp(robot.x, robot.y)
-
+    '''
     pygame.display.update()
     time.sleep(0.001)
 

@@ -1,4 +1,4 @@
-
+import math
 import pygame
 
 class Robot():
@@ -10,12 +10,19 @@ class Robot():
         self.width = 20
         self.screen = screen
         self.direction = 'up'
+        self.center = (self.x, self.y)
+        self.surface = pygame.Surface((self.width, self.height))
 
-    def draw(self):
+    def draw(self, degrees):
 
-        if self.direction == 'up':
-            point_of_triangle = (self.x, (self.y - self.height/2))
-            coordinates = [(self.x - self.width/2, self.y + self.height/2), point_of_triangle, (self.x + self.width/2, self.y + self.height/2)]
+        angle = math.pi*degrees/180
+
+        #if self.direction == 'up':
+        point_of_triangle = (self.x + self.height/2 * math.cos(math.pi*90/180 + angle), (self.y - self.height/2 * math.sin(math.pi*90/180 + angle)))
+        bottom_left = (self.x + self.height/2 * math.cos(math.pi*225/180 + angle), self.y - self.height/2 * math.sin(math.pi*225/180 + angle))
+        bottom_right = (self.x + self.height/2 * math.cos(math.pi*315/180 + angle), self.y - self.height/2 * math.sin(math.pi*315/180 + angle))
+        coordinates = [bottom_left, point_of_triangle, bottom_right]
+        '''
         elif self.direction == 'left':
             point_of_triangle = (self.x - self.width/2, self.y)
             coordinates = [(self.x + self.height/2, self.y - self.width/2), point_of_triangle, (self.x + self.height/2, self.y + self.width/2)]
@@ -25,12 +32,11 @@ class Robot():
         elif self.direction == 'down':
             point_of_triangle = (self.x, (self.y + self.height/2))
             coordinates = [(self.x - self.width/2, self.y - self.height/2), point_of_triangle, (self.x + self.width/2, self.y - self.height/2)]
-
+        '''
         #pygame.draw.rect(self.screen, (255, 255, 255), (self.x, self.y, self.width, self.height),0)
         pygame.draw.polygon(self.screen, (255, 255, 255), coordinates)
 
     def getDistance(self, barrier, direction):
-        print(direction)
         if direction == 'up' or direction == 'down':
             distance = self.y - barrier.y + barrier.height/2
         elif direction == 'left' or direction == 'right':
@@ -133,4 +139,3 @@ class Barrier():
 
     def draw(self):
         pygame.draw.rect(self.screen, (255, 255, 255), (self.x, self.y, self.width, self.height),0)
-
