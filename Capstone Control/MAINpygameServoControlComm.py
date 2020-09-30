@@ -3,10 +3,9 @@ import time
 import pygame
 import math
 from getData import Receiver
-#from automobile import Automobile
-#from motor import Motor
 from pygamePieces import Robot, Barrier
 
+# ---------------- Initialize Pygame -----------------
 pygame.init()
 screen = pygame.display.set_mode((600, 600))
 
@@ -20,7 +19,7 @@ def barrierExists(barrierList, x, y):
     return False
 
 
-
+# ---------------- Initialize Pygame Pieces -----------------
 robotX = 800
 robotY = 800
 
@@ -32,24 +31,20 @@ x_change = 0
 barrierList = []
 
 
+# ---------------- Initialize Receiver/Server -----------------
 IP = '192.168.0.21'
 PORT = 1234
 r = Receiver(IP, PORT)
 
-'''
-fl = Motor(4)
-fr = Motor(17)
-br = Motor(22)
-bl = Motor(27)
 
-auto = Automobile(fr, br, fl, bl)
-'''
-
+# ---------------- Initialize Variables -----------------
 temp_data = 0
 accel_data = ''
 gyro_data = ''
 sonar_data = 0
 
+
+# ---------------- Begin Mainloop -----------------
 running = True
 while running:
 

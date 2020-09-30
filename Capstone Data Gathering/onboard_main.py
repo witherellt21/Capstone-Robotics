@@ -20,27 +20,17 @@ client.PORT = 1234
 
 client.connect()
 
-# ---------------- Initialize Pygame -----------------
-#pygame.init()
-#screen = pygame.display.set_mode((600, 600))
-msg = 'stop'
-counter = 0
-
 
 # ---------------- Initialize Sonar -----------------
-print('start')
 s = Sonar(18, 24)
+
+# ---------------- Initialize IMU -----------------
 imu = IMU()
 msg = ""
 
 running = True
 while running:
 
-    counter += 1
-
-    #screen.fill((0,0,0))
-
-    #if counter == 10:
     dist = round(s.distance(), 3)
 
     ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
@@ -51,16 +41,10 @@ while running:
 
     msg = "sonar = " + str(dist) + ",, temp = " + str(temp) + ",, accel = " + str(acc)+ ",, gyro = " + str(gyro)
     print(str(msg))
-    #ounter = 0
     client.send(msg)
 
-    #pygame.display.update()
-
     #client.receive()
-    #if counter == 100:
-        #running = False
 
     msg = ""
 
 print('done')
-#pygame.quit()
