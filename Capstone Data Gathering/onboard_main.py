@@ -9,6 +9,8 @@ from sonar import Sonar
 import pygame
 import time
 from imu import IMU
+from motor import Motor
+from automobile import Automobile
 
 
 # ---------------- Initialize Client -----------------
@@ -28,10 +30,22 @@ s = Sonar(18, 24)
 imu = IMU()
 msg = ""
 
+# ---------------- Initialize Motors -----------------
+fl = Motor()
+fr = Motor()
+bl = Motor()
+br = Motor()
+
+# ---------------- Initialize Automobile -----------------
+auto = Automobile(fr, br, fl, bl)
+
 running = True
 while running:
 
     dist = round(s.distance(), 3)
+
+    if dist <= 6:
+        auto.park()
 
     ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
     if ag_data_ready:
