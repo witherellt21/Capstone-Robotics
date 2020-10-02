@@ -2,13 +2,15 @@
 import time
 import pygame
 import math
-from pygamePieces import Robot, Barrier
-from xboxControl import Controller
 from motor import Motor
 from automobile import Automobile
+from pygamePieces import Robot, Barrier
+from xboxControl import Controller
+
 
 pygame.init()
 screen = pygame.display.set_mode((1700, 900))
+
 
 def drawDivider(x, y, Color):
     pygame.draw.rect(screen, Color, (x, y, 10, 900),0)
@@ -30,25 +32,24 @@ x_change = 0
 
 barrierList = []
 
+joysticks = []
+
+pygame.joystick.init()
+
 c = Controller()
-angle = 0
-rotation = ''
 
 fl = Motor(4)
 fr = Motor(17)
 br = Motor(22)
 bl = Motor(27)
 
-robot = Automobile(fr, br, fl, bl)
-counter = 0
-elapsed_time_list = []
+auto = Automobile(fr, br, fl, bl)
+
+angle = 0
+rotation = ''
 
 running = True
 while running:
-
-    counter += 1
-
-    start_time = time.time()
 
     screen.fill((0,0,0))
     for event in pygame.event.get():
@@ -56,6 +57,7 @@ while running:
             running = False
 
         if event.type == pygame.JOYBUTTONDOWN:
+            #This will include all button actions
             # 0 = A
             # 1 = B
             # 2 = X
@@ -68,16 +70,15 @@ while running:
             elif event.button == 5:
                 rotation = 'right'
         if event.type == pygame.JOYBUTTONUP:
-            if event.button == 4:
+            if event.button == 4 or event.button == 5:
                 rotation = ''
-            elif event.button == 5:
-                rotation = ''
-
+                turning = ''
         if event.type == pygame.JOYHATMOTION:
             if event.value[0] == 1:
                 print('hello')
             if event.value[0] == -1:
                 print('yo')
+
 
     x_change = c.joystick.get_axis(c.LEFT_X)
     y_change = c.joystick.get_axis(c.LEFT_Y)
@@ -86,13 +87,18 @@ while running:
     if abs(y_change) <= 0.1:
         y_change = 0
 
-        #j.get_axis(RIGHT_X)
-        #j.get_axis(RIGHT_Y)
+        # These variables will be responsible for the scanning aspect of the robot
+        horizontal_change = c.joystick.get_axis(c.RIGHT_X)
+        vertical_change = c.joystick.get_axis(c.RIGHT_Y)
+
+    #print(y_change)
 
     if rotation == 'left':
-        angle += 1
+        angle += 0.4
+        auto.leftTurn()
     elif rotation == 'right':
-        angle -= 1
+        angle -= 0.4
+        auto.rightTurn()
 
 
     robot.y += y_change * math.cos(math.pi*angle/180)
@@ -103,13 +109,12 @@ while running:
 
     if x_change > 0:
         pass
-        #fl.left()
     if y_change > 0:
-        fl.backward()
+        auto.drive()
     elif y_change < 0:
-        fl.forward()
+        auto.reverse()
     else:
-        fl.stop()
+        auto.park()
 
 
     barrierX = 740
@@ -118,19 +123,6 @@ while running:
     #barrierX = 780
     #barrierY = 600
 
-     # making a copy of the old center of the rectangle
-    old_center = robot.center
-    # defining angle of the rotation
-    #rot = (rot + rot_speed) % 360
-
-    # rotating the orignal image
-    #new_image = pygame.transform.rotate(robot.surface , rot)
-    # set the rotated rectangle to the old center
-    #rect.center = old_center
-    # drawing the rotated rectangle to the screen
-    #screen.blit(new_image , rect)
-
-    '''
     if not barrierExists(barrierList, barrierX, barrierY):
         barrier = Barrier(screen, barrierX, barrierY, 5, 5)
         #barrier = Barrier(screen, barrierX, barrierY, 10, 40)
@@ -145,20 +137,8 @@ while running:
             #robot.getDirection(barrier, d)
         #if isCollision(robot.x, robot.y, barrier.x, barrier.y):
         #    displayWarningUp(robot.x, robot.y)
-    '''
+
     pygame.display.update()
-
-    end_time = time.time()
-
-    elapsed_time = end_time - start_time
-    elapsed_time_list.append(elapsed_time)
-    total = 0
-    if counter == 1000:
-        for item in elapsed_time_list:
-            total += item
-        print(total/counter)
-        running = False
-
     time.sleep(0.001)
 
 pygame.quit()
