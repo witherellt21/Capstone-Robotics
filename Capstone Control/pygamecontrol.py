@@ -4,6 +4,8 @@ import pygame
 import math
 from pygamePieces import Robot, Barrier
 from xboxControl import Controller
+from motor import Motor
+from automobile import Automobile
 
 pygame.init()
 screen = pygame.display.set_mode((1700, 900))
@@ -33,9 +35,21 @@ c = Controller()
 angle = 0
 rotation = ''
 
+fl = Motor(4)
+##fr = Motor(17)
+#br = Motor(22)
+#bl = Motor(27)
+
+#robot = Automobile(fr, br, fl, bl)
+counter = 0
+elapsed_time_list = []
 
 running = True
 while running:
+
+    counter += 1
+
+    start_time = time.time()
 
     screen.fill((0,0,0))
     for event in pygame.event.get():
@@ -77,9 +91,9 @@ while running:
         #j.get_axis(RIGHT_Y)
 
     if rotation == 'left':
-        angle += 0.4
+        angle += 1
     elif rotation == 'right':
-        angle -= 0.4
+        angle -= 1
 
 
     robot.y += y_change * math.cos(math.pi*angle/180)
@@ -87,6 +101,17 @@ while running:
 
     drawDivider(945, 0, (255, 255, 255))
     robot.draw(angle)
+
+    if x_change > 0:
+        pass
+        #fl.left()
+    if y_change > 0:
+        fl.backward()
+    elif y_change < 0:
+        fl.forward()
+    else:
+        fl.stop()
+
 
     barrierX = 740
     barrierY = 700
@@ -123,6 +148,18 @@ while running:
         #    displayWarningUp(robot.x, robot.y)
     '''
     pygame.display.update()
+
+    end_time = time.time()
+
+    elapsed_time = end_time - start_time
+    elapsed_time_list.append(elapsed_time)
+    total = 0
+    if counter == 1000:
+        for item in elapsed_time_list:
+            total += item
+        print(total/counter)
+        running = False
+
     time.sleep(0.001)
 
 pygame.quit()

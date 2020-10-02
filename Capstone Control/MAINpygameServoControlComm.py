@@ -4,6 +4,7 @@ import pygame
 import math
 from getData import Receiver
 from pygamePieces import Robot, Barrier
+from xboxControl import Controller
 
 # ---------------- Initialize Pygame -----------------
 pygame.init()
@@ -43,11 +44,55 @@ accel_data = ''
 gyro_data = ''
 sonar_data = 0
 
+c = Controller()
+
 
 # ---------------- Begin Mainloop -----------------
 running = True
 while running:
 
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+        if event.type == pygame.JOYBUTTONDOWN:
+            # 0 = A
+            # 1 = B
+            # 2 = X
+            # 3 = Y
+            print(event.button)
+
+        if event.type == pygame.JOYHATMOTION:
+            if event.value[0] == 1:
+                print('hello')
+            if event.value[0] == -1:
+                print('yo')
+
+    for j in joysticks:
+        x_change = j.get_axis(LEFT_X)
+        y_change = j.get_axis(LEFT_Y)
+        if abs(x_change) <= 0.1:
+            x_change = 0
+        if abs(y_change) <= 0.1:
+            y_change = 0
+
+        print(j.get_axis(RIGHT_X))
+        print(j.get_axis(RIGHT_Y))
+
+    print(y_change)
+
+    robot.y += y_change
+    robot.x += x_change
+
+    if x_change > 0:
+        pass
+        #fl.left()
+    if y_change > 0:
+        fl.backward()
+    elif y_change < 0:
+        fl.forward()
+    else:
+        fl.stop()
     screen.fill((0,0,0))
 
     if r.server.disconnect_counter > 0:
@@ -93,10 +138,10 @@ while running:
     print('\n')
     print('temp = ', temp_data)
     print('sonar = ', sonar_data)
-                    
-    time.sleep(.1)  
 
-    
+    time.sleep(.1)
+
+
 
     '''
 
