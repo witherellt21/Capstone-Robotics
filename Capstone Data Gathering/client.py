@@ -8,9 +8,9 @@ import socket
 
 class Client():
 
-    def __init__(self):
-        self.IP = ''
-        self.PORT = None
+    def __init__(self, ip, port):
+        self.IP = ip
+        self.PORT = port
         self.s = socket.socket( socket.AF_INET, socket.SOCK_STREAM )
 
     def connect( self ):
@@ -20,6 +20,4 @@ class Client():
         self.s.sendall( bytes( string, "utf-8" )  )
 
     def receive( self ):
-        msg = self.s.recv(1024)
-        message = msg.decode(("utf-8"))
-        #print(message)
+        return self.s.recv(1).decode("utf-8")
