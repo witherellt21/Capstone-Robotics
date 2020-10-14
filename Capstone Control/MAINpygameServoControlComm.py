@@ -79,11 +79,8 @@ while running:
         print(j.get_axis(RIGHT_X))
         print(j.get_axis(RIGHT_Y))
 
-    print(y_change)
 
-    robot.y += y_change
-    robot.x += x_change
-
+    #Control servo's
     if x_change > 0:
         pass
         #fl.left()
@@ -95,6 +92,7 @@ while running:
         fl.stop()
     screen.fill((0,0,0))
 
+    # If client disconnects from server, reconnect
     if r.server.disconnect_counter > 0:
         r.server.receiveConnection()
 
