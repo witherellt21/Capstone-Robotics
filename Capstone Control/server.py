@@ -1,7 +1,8 @@
-# Filename: server.py
-# Written by: Taylor Witherell
-# Creates a server socket established on the RPi's IP address available for client connection
-
+'''
+Filename: server.py
+Written by: Taylor Witherell
+Description: Creates a server socket established on the RPi's IP address available for client connection
+'''
 
 import socket
 
@@ -32,7 +33,8 @@ class Server():
             return msg
         else:
             self.disconnect_counter += 1
-        #print(data)
+
+
 '''
 while True:
     clientsocket, address = s.accept()

@@ -1,3 +1,10 @@
+'''
+Filename: Sonar.py
+Author: Taylor Witherell
+Description: Contains sonar class for initializing sonar sensor and
+receiving data.
+'''
+
 #Libraries
 import RPi.GPIO as GPIO
 import time
