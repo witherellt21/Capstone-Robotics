@@ -17,13 +17,13 @@ from automobile import Automobile
 
 # Set the client to the server's IP and PORT address
 IP = '192.168.0.3'
-PORT = 1234
+PORT = 10000
 server = Server(IP, PORT)
 
 server.start()
 server.receiveConnection()
 
-
+print('Connection Received')
 # ---------------- Initialize Sonar -----------------
 s = Sonar(18, 24)
 
@@ -71,7 +71,7 @@ while running:
     if r.server.disconnect_counter > 0:
         r.server.receiveConnection()
 
-    client.send(msg)
+    server.send(msg)
 
     #client.receive()
 
