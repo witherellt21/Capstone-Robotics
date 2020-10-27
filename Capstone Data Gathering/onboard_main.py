@@ -11,6 +11,7 @@ import time
 from imu import IMU
 from motor import Motor
 from automobile import Automobile
+from IRsensor import IR
 
 
 # ---------------- Initialize Server -----------------
@@ -60,7 +61,7 @@ while running:
     if ag_data_ready:
         temp, acc, gyro = imu.read_ag()
 
-    print(IR.status)
+    print(ir.status())
 
     time.sleep(.3)
 
@@ -68,8 +69,8 @@ while running:
     #print(str(msg))
 
     # If client disconnects from server, reconnect
-    if r.server.disconnect_counter > 0:
-        r.server.receiveConnection()
+    if server.disconnect_counter > 0:
+        server.receiveConnection()
 
     server.send(msg)
 
