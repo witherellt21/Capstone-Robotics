@@ -12,8 +12,8 @@ class Receiver():
     def __init__(self, IP, PORT):
         self.client = Client(IP, PORT)
 
-    def receive(self, msg):
-        #msg = self.server.receive()
+    def receive(self):
+        msg = self.client.receive()
         #msg = 'accel = 20, sonar = 30, temp = 70'
         if not msg == None:
             #print(msg)
