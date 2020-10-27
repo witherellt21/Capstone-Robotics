@@ -20,55 +20,6 @@ def barrierExists(barrierList, x, y):
     return False
 
 
-def getData():
-    data = r.datalist
-    
-    #GET TEMPERATURE DATA
-    temp_data = r.getTemp(temp_data)
-
-    #GET ACCELEROMETER DATA
-    accel_data = r.getAccel(accel_data)
-    a_datalist = accel_data.split(',')
-    ax = a_datalist[0].strip('[')
-    ay = a_datalist[1]
-    az = a_datalist[2].strip(']')
-
-    print('\n')
-    print('ax =', ax)
-    print('ay =', ay)
-    print('az =', az)
-
-    #GET GYROSCOPE DATA
-    gyro_data = r.getGyro(gyro_data)
-    g_datalist = gyro_data.split(',')
-    gx = g_datalist[0].strip('[')
-    gy = g_datalist[1]
-    if 'sonar' in g_datalist[2]:
-        gz = g_datalist[2].strip(']sonar')
-    else: gz = g_datalist[2].strip(']')
-
-    print('\n')
-    print('gx =', gx)
-    print('gy =', gy)
-    print('gz =', gz)
-
-    #GET SONAR DATA
-    sonar_data = r.getSonar(sonar_data)
-
-    print('\n')
-    print('temp = ', temp_data)
-    print('sonar = ', sonar_data)
-
-def send_and_receive(data):
-    # If client disconnects from server, reconnect
-    if r.server.disconnect_counter > 0:
-        r.server.receiveConnection()
-
-    r.receive()
-    r.send(data)
-    time.sleep(.1)
-
-
 # ---------------- Initialize Pygame Pieces -----------------
 robotX = 800
 robotY = 800
@@ -85,7 +36,6 @@ barrierList = []
 IP = '192.168.0.21'
 PORT = 1234
 r = Receiver(IP, PORT)
-r.client.connect()
 
 
 # ---------------- Initialize Variables -----------------
@@ -94,7 +44,7 @@ accel_data = ''
 gyro_data = ''
 sonar_data = 0
 
-#c = Controller()
+c = Controller()
 
 
 # ---------------- Begin Mainloop -----------------
@@ -110,7 +60,7 @@ while running:
             # 1 = B
             # 2 = X
             # 3 = Y
-            pass
+            print(event.button)
 
         if event.type == pygame.JOYHATMOTION:
             if event.value[0] == 1:
@@ -125,17 +75,31 @@ while running:
             x_change = 0
         if abs(y_change) <= 0.1:
             y_change = 0
-<<<<<<< HEAD
 
         print(j.get_axis(RIGHT_X))
         print(j.get_axis(RIGHT_Y))
 
 
+    #Control servo's
+    if x_change > 0:
+        pass
+        #fl.left()
+    if y_change > 0:
+        fl.backward()
+    elif y_change < 0:
+        fl.forward()
+    else:
+        fl.stop()
     screen.fill((0,0,0))
+
+    # If client disconnects from server, reconnect
+    if r.server.disconnect_counter > 0:
+        r.server.receiveConnection()
 
     r.receive()
 
     data = r.datalist
+
 
     #GET TEMPERATURE DATA
     temp_data = r.getTemp(temp_data)
@@ -202,9 +166,6 @@ while running:
         y_change = 0
         x_change = 0
     '''
-=======
-    
->>>>>>> df4c25fae8ef545289a12732c82f95c683d3c2b2
 
     robot.y += y_change
     robot.x += x_change
@@ -215,6 +176,8 @@ while running:
     barrierX = 740
     barrierY = 700
 
+    #barrierX = 780
+    #barrierY = 600
 
     if not barrierExists(barrierList, barrierX, barrierY):
         barrier = Barrier(screen, barrierX, barrierY, 5, 5)
