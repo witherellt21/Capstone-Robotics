@@ -33,8 +33,8 @@ barrierList = []
 
 
 # ---------------- Initialize Receiver/Server -----------------
-IP = '192.168.0.20'
-PORT = 1234
+IP = '192.168.0.3'
+PORT = 10000
 r = Receiver(IP, PORT)
 r.client.connect()
 
@@ -69,6 +69,7 @@ while running:
             if event.value[0] == -1:
                 print('yo')
 
+    '''
     for j in joysticks:
         x_change = j.get_axis(LEFT_X)
         y_change = j.get_axis(LEFT_Y)
@@ -80,7 +81,7 @@ while running:
 
         print(j.get_axis(RIGHT_X))
         print(j.get_axis(RIGHT_Y))
-
+    '''
 
     screen.fill((0,0,0))
 
