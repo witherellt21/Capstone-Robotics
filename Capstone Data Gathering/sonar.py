@@ -51,8 +51,8 @@ class Sonar():
         return distance
 
 
-'''
-s = Sonar()
+
+s = Sonar(18, 24)
 
 if __name__ == '__main__':
     try:
@@ -65,4 +65,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
-'''

@@ -31,7 +31,8 @@ class IMU():
             #try:
             ag_data_ready = self.driver.read_ag_status().accelerometer_data_available
             if ag_data_ready:
-                self.read_ag()
+                print(self.read_ag())
+
             else:
                 time.sleep(0.1)
                 '''
@@ -47,3 +48,7 @@ class IMU():
     def read_magnetometer(self):
         mag = self.driver.read_magnetometer()
         print('Mag {}'.format(mag))
+
+imu = IMU()
+
+imu.main()

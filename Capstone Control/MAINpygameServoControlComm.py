@@ -36,6 +36,7 @@ barrierList = []
 IP = '192.168.0.21'
 PORT = 1234
 r = Receiver(IP, PORT)
+r.client.connect()
 
 
 # ---------------- Initialize Variables -----------------
@@ -44,7 +45,7 @@ accel_data = ''
 gyro_data = ''
 sonar_data = 0
 
-c = Controller()
+#c = Controller()
 
 
 # ---------------- Begin Mainloop -----------------
@@ -80,26 +81,11 @@ while running:
         print(j.get_axis(RIGHT_Y))
 
 
-    #Control servo's
-    if x_change > 0:
-        pass
-        #fl.left()
-    if y_change > 0:
-        fl.backward()
-    elif y_change < 0:
-        fl.forward()
-    else:
-        fl.stop()
     screen.fill((0,0,0))
-
-    # If client disconnects from server, reconnect
-    if r.server.disconnect_counter > 0:
-        r.server.receiveConnection()
 
     r.receive()
 
     data = r.datalist
-
 
     #GET TEMPERATURE DATA
     temp_data = r.getTemp(temp_data)
