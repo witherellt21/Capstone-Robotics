@@ -4,7 +4,7 @@ Filename: onboard_main.py
 Description: Main loop for robot to send and receive data.
 '''
 
-from client import Client
+from server import Server
 from sonar import Sonar
 import pygame
 import time
@@ -13,12 +13,12 @@ from motor import Motor
 from automobile import Automobile
 
 
-# ---------------- Initialize Client -----------------
-server = Server()
+# ---------------- Initialize Server -----------------
 
 # Set the client to the server's IP and PORT address
-server.IP = '192.168.0.21'
-server.PORT = 1234
+IP = '192.168.0.3'
+PORT = 1234
+server = Server(IP, PORT)
 
 server.start()
 server.receiveConnection()
