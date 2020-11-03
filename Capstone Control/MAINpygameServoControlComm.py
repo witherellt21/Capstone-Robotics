@@ -33,9 +33,17 @@ barrierList = []
 
 
 # ---------------- Initialize Receiver/Server -----------------
-IP = '192.168.0.3'
-PORT = 10000
-r = Receiver(IP, PORT)
+try:
+    IP = '192.168.0.3'
+    PORT = 10000
+    r = Receiver(IP, PORT)
+except:
+    try:
+        IP = '192.168.0.3'
+        PORT = 10001
+        r = Receiver(IP, PORT)
+    except:
+        pass
 r.client.connect()
 
 
@@ -89,6 +97,10 @@ while running:
 
     data = r.datalist
 
+    print(data)
+    print('\n')
+
+    '''
     #GET TEMPERATURE DATA
     temp_data = r.getTemp(temp_data)
 
@@ -124,7 +136,8 @@ while running:
     print('\n')
     print('temp = ', temp_data)
     print('sonar = ', sonar_data)
-
+    '''
+    
     time.sleep(.1)
 
 
@@ -155,7 +168,7 @@ while running:
         x_change = 0
     '''
 
-
+    '''
     robot.y += y_change
     robot.x += x_change
 
@@ -180,7 +193,8 @@ while running:
             #robot.getDirection(barrier, d)
         #if isCollision(robot.x, robot.y, barrier.x, barrier.y):
         #    displayWarningUp(robot.x, robot.y)
-
+    '''
+    
     pygame.display.update()
     time.sleep(0.001)
 
