@@ -17,9 +17,14 @@ from IRsensor import IR
 # ---------------- Initialize Server -----------------
 
 # Set the client to the server's IP and PORT address
-IP = '192.168.0.3'
-PORT = 10000
-server = Server(IP, PORT)
+try:
+    IP = '192.168.0.3'
+    PORT = 10000
+    server = Server(IP, PORT)
+finally:
+    IP = '192.168.0.3'
+    PORT = 10000
+    server = Server(IP, PORT)
 
 server.start()
 server.receiveConnection()
@@ -33,7 +38,7 @@ imu = IMU()
 msg = ""
 
 # ---------------- Initialize IR -----------------
-ir = IR(14)
+ir = IR(17)
 
 
 '''
@@ -50,7 +55,7 @@ auto = Automobile(fr, br, fl, bl)
 running = True
 while running:
 
-    dist = round(s.distance(), 3)
+    dist = round(s.distance(), 2)
 
     '''
     if dist <= 6:
@@ -63,16 +68,15 @@ while running:
 
     print(ir.status())
 
-    time.sleep(.3)
-
     msg = "sonar = " + str(dist) + ",, temp = " + str(temp) + ",, accel = " + str(acc)+ ",, gyro = " + str(gyro)
-    #print(str(msg))
+    print(str(msg))
 
     # If client disconnects from server, reconnect
     if server.disconnect_counter > 0:
         server.receiveConnection()
 
     server.send(msg)
+    time.sleep(.3)
 
     #client.receive()
 
