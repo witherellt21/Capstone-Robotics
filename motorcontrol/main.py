@@ -15,7 +15,7 @@ def rightTurn(motorKit, throttle):
     motorKit.motor2.throttle = -throttle
     motorKit.motor3.throttle = throttle
     motorKit.motor4.throttle = -throttle
-    
+
 def leftTurn(motorKit, throttle):
     "Performs a right turn"
     motorKit.motor1.throttle = throttle
@@ -42,8 +42,8 @@ def forward(motorKit):
     motorKit.motor2.throttle = -0.8
     motorKit.motor3.throttle = 0.8
     motorKit.motor4.throttle = -0.8
-    
-    
+
+
 SCREEN_SIZE = (100,100)
 
 def main():
@@ -51,9 +51,9 @@ def main():
     pygame.init()
     pygame.display.set_caption("Motor Test")
     screen = pygame.display.set_mode(list(SCREEN_SIZE))
-    
+
     robot = MotorKit()
-    
+
     while RUNNING:
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -100,8 +100,8 @@ def main():
                     stop(robot)
                 elif event.key == pygame.K_RIGHT:
                     stop(robot)
-    
+
     pygame.quit()
-    
+
 if __name__ == "__main__":
     main()
