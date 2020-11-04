@@ -89,14 +89,14 @@ while running:
 
     # Compile a data string to send to the client
     msg = "sonar = " + str(dist) + ",, temp = " + str(temp) + ",, accel = " + str(acc)+ ",, gyro = " + str(gyro)
-    tag = str(len(msg))
-    msg = tag + msg
+    #tag = str(len(msg))
+    #msg = tag + msg
     print(str(msg))
 
     # If client disconnects from server, reconnect
     if server.disconnect_counter > 0:
         server.receiveConnection()
-    break
+
     server.send(msg)
     time.sleep(.3)
 
