@@ -34,58 +34,80 @@ server.receiveConnection()
 
 print('Connection Received')
 
+sonar_status = 'active'
+imu_status = 'active'
+ir_sensor_status = 'inactive'
+motor_status = 'inactive'
+
 
 # ----------------- Initialize Sonar -----------------
-s = Sonar(18, 24)
+if sonar_status == 'active':
+    s = Sonar(18, 24)
 
 
 # ------------------ Initialize IMU ------------------
-imu = IMU()
-msg = ""
+if imu_status == 'active':
+    imu = IMU()
 
 
 # ------------------ Initialize IR -------------------
-ir = IR(17)
+if ir_sensor_status == 'active':
+    ir = IR(17)
 
 
 # ---------------- Initialize Motors -----------------
-robot = MotorKit()
+if motor_status == 'active':
+    robot = MotorKit()
 
+dist = ''
+temp = ''
+gyro = ''
+acc = ''
+msg = ""
 
 running = True
 while running:
 
-    dist = round(s.distance(), 2)   # Get sonar distance data
+    if sonar_status == 'active':
+        dist = round(s.distance(), 2)   # Get sonar distance data
 
-    '''
-    if dist <= 6:
-        auto.park()
-    '''
 
-    ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
-    if ag_data_ready:
-        temp, acc, gyro = imu.read_ag()   # Get IMU data
+        if dist <= 6:
+            robot.motor1.throttle = 0 # Right side wheels
+            robot.motor2.throttle = 0
+            robot.motor3.throttle = 0 # Left side wheels are turned opposite to the right side wheels
+            robot.motor4.throttle = 0
 
-    #print(ir.status())   # Print status of proximity sensor
+    if imu_status == 'active':
+        ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
+        if ag_data_ready:
+            temp, acc, gyro = imu.read_ag()   # Get IMU data
+
+    if ir_sensor_status == 'active':
+        pass
+        #print(ir.status())   # Print status of proximity sensor
 
     # Compile a data string to send to the client
     msg = "sonar = " + str(dist) + ",, temp = " + str(temp) + ",, accel = " + str(acc)+ ",, gyro = " + str(gyro)
+    tag = str(len(msg))
+    msg = tag + msg
     print(str(msg))
 
     # If client disconnects from server, reconnect
     if server.disconnect_counter > 0:
         server.receiveConnection()
-
-    #server.send(msg)
+    break
+    server.send(msg)
     time.sleep(.3)
 
-    control = server.receive()
+    #control = server.receive()
 
-    # Wheels are turned at the same ratio as the joystick is held
-    robot.motor1.throttle = control # Right side wheels
-    robot.motor2.throttle = control
-    robot.motor3.throttle = -control # Left side wheels are turned opposite to the right side wheels
-    robot.motor4.throttle = -control
+    if motor_status == 'active':
+        # Wheels are turned at the same ratio as the joystick is held
+        robot.motor1.throttle = control # Right side wheels
+        robot.motor2.throttle = control
+        robot.motor3.throttle = -control # Left side wheels are turned opposite to the right side wheels
+        robot.motor4.throttle = -control
 
 
     msg = ""
