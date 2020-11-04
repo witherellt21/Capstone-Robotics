@@ -17,7 +17,6 @@ class Receiver():
         #msg = 'accel = 20, sonar = 30, temp = 70'
         if not msg == None:
             #print(msg)
-            print(msg)
             self.separateData(msg)
         #if self.server.disconnect_counter == 5:
             #self.server.receiveConnection()
@@ -45,6 +44,7 @@ class Receiver():
 
 
     def getAccel(self, last):
+        print('hi')
         for data in self.datalist:
             if 'accel' in data:
                 try: return float(data.split('=')[1].strip())

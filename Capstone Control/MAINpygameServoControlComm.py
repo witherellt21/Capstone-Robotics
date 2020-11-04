@@ -97,15 +97,16 @@ while running:
 
     data = r.datalist
 
-    print(data)
-    print('\n')
+    #print(data)
+    #print('\n')
 
-    '''
+    
     #GET TEMPERATURE DATA
-    temp_data = r.getTemp(temp_data)
+    #temp_data = r.getTemp(temp_data)
 
     #GET ACCELEROMETER DATA
     accel_data = r.getAccel(accel_data)
+    print(accel_data)
     a_datalist = accel_data.split(',')
     ax = a_datalist[0].strip('[')
     ay = a_datalist[1]
@@ -136,7 +137,7 @@ while running:
     print('\n')
     print('temp = ', temp_data)
     print('sonar = ', sonar_data)
-    '''
+    
     
     time.sleep(.1)
 

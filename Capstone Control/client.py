@@ -20,4 +20,4 @@ class Client():
         self.s.sendall( bytes( string, "utf-8" )  )
 
     def receive( self ):
-        return self.s.recv(0).decode("utf-8")
+        return self.s.recv(1024).decode("utf-8")
