@@ -73,10 +73,11 @@ while running:
 
 
         if dist <= 6:
-            robot.motor1.throttle = 0 # Right side wheels
-            robot.motor2.throttle = 0
-            robot.motor3.throttle = 0 # Left side wheels are turned opposite to the right side wheels
-            robot.motor4.throttle = 0
+            if motor_status == 'active':
+                robot.motor1.throttle = 0 # Right side wheels
+                robot.motor2.throttle = 0
+                robot.motor3.throttle = 0 # Left side wheels are turned opposite to the right side wheels
+                robot.motor4.throttle = 0
 
     if imu_status == 'active':
         ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
@@ -108,7 +109,6 @@ while running:
         robot.motor2.throttle = control
         robot.motor3.throttle = -control # Left side wheels are turned opposite to the right side wheels
         robot.motor4.throttle = -control
-
 
     msg = ""
 
