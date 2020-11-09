@@ -1,4 +1,3 @@
-#import pyfirmata
 import time
 import pygame
 import math
@@ -35,7 +34,7 @@ barrierList = []
 # ---------------- Initialize Receiver/Server -----------------
 try:
     IP = '192.168.0.3'
-    PORT = 10000
+    PORT = 10001
     r = Receiver(IP, PORT)
 except:
     try:
@@ -53,6 +52,8 @@ accel_data = ''
 gyro_data = ''
 sonar_data = 0
 
+message = ''
+
 #c = Controller()
 
 
@@ -63,6 +64,14 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.KEY_UP:
+                message = 'forward'
+
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.KEY_UP:
+                message = 'stop'
 
         if event.type == pygame.JOYBUTTONDOWN:
             # 0 = A
@@ -106,7 +115,6 @@ while running:
 
     #GET ACCELEROMETER DATA
     accel_data = r.getAccel(accel_data)
-    print(accel_data)
     a_datalist = accel_data.split(',')
     ax = a_datalist[0].strip('[')
     ay = a_datalist[1]
@@ -117,15 +125,18 @@ while running:
     print('ay =', ay)
     print('az =', az)
 
+
     #GET GYROSCOPE DATA
     gyro_data = r.getGyro(gyro_data)
     g_datalist = gyro_data.split(',')
     gx = g_datalist[0].strip('[')
     gy = g_datalist[1]
+    gz = g_datalist[2].strip(']')
+    
     if 'sonar' in g_datalist[2]:
         gz = g_datalist[2].strip(']sonar')
     else: gz = g_datalist[2].strip(']')
-
+    
     print('\n')
     print('gx =', gx)
     print('gy =', gy)
@@ -195,6 +206,8 @@ while running:
         #if isCollision(robot.x, robot.y, barrier.x, barrier.y):
         #    displayWarningUp(robot.x, robot.y)
     '''
+
+    client.send(message)
     
     pygame.display.update()
     time.sleep(0.001)

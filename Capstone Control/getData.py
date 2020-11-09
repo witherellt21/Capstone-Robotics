@@ -25,7 +25,7 @@ class Receiver():
         self.client.send(string)
 
     def separateData(self, msg):
-        self.datalist = msg.split(',')
+        self.datalist = msg.split(',,')
 
     def getIMU(self, last):
         for data in self.datalist:
@@ -43,12 +43,19 @@ class Receiver():
         return last
 
 
+    def getGyro(self, last):
+        for data in self.datalist:
+            if 'gyro' in data:
+                return data.split('=')[1].strip()
+                #except: return last
+        return last
+
+
     def getAccel(self, last):
-        print('hi')
         for data in self.datalist:
             if 'accel' in data:
-                try: return float(data.split('=')[1].strip())
-                except: return last
+                return data.split('=')[1].strip()
+                #except: return last
         return last
 
         #if len(self.datalist) > 0:
