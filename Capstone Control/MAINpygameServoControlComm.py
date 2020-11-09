@@ -34,7 +34,7 @@ barrierList = []
 # ---------------- Initialize Receiver/Server -----------------
 try:
     IP = '192.168.0.3'
-    PORT = 10001
+    PORT = 10000
     r = Receiver(IP, PORT)
 except:
     try:
@@ -207,7 +207,7 @@ while running:
         #    displayWarningUp(robot.x, robot.y)
     '''
 
-    client.send(message)
+    r.client.send(message)
     
     pygame.display.update()
     time.sleep(0.001)
