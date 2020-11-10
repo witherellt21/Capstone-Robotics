@@ -3,11 +3,11 @@
 import pygame
 from pygame.locals import *
 
-class App:
-    def __init__(self):
-        pygame.init()
+class Controller:
 
-        #pygame.display.set_caption("Joystick Analyzer")
+    def __init__(self):
+
+        pygame.init()
 
         # Set up the joystick
         pygame.joystick.init()
@@ -24,15 +24,7 @@ class App:
             self.my_joystick = pygame.joystick.Joystick(0)
             self.my_joystick.init()
 
-        max_joy = max(self.my_joystick.get_numaxes(), 
-                      self.my_joystick.get_numbuttons(), 
-                      self.my_joystick.get_numhats())
-
-        #self.screen = pygame.display.set_mode( (max_joy * 30 + 10, 170) )
-
-        self.font = pygame.font.SysFont("Courier", 20)
-
-    def main(self):
+    def run(self):
 
         while (True):
 
@@ -43,5 +35,9 @@ class App:
     def quit(self):
         pygame.display.quit()
 
-app = App()
-app.main()
+if __name__ == '__main__':
+   '''
+   This will prevent main code being run when someone does from ps3controller import *
+   '''
+   c = Controller()
+   c.run()
