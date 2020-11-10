@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 '''
 Author: Taylor Witherell
 Filename: xboxControl.py
@@ -17,3 +18,15 @@ class Controller():
         self.LEFT_Y = 1
         self.RIGHT_X = 3
         self.RIGHT_Y = 4
+
+    def getAxes(self):
+
+       print(self.joystick.get_axes(0))
+
+if __name__ == '__main__':
+
+   c = Controller()
+
+   while True:
+
+       controller.getAxes()
