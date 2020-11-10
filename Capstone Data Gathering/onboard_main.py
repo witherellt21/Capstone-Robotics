@@ -65,6 +65,8 @@ gyro = ''
 acc = ''
 msg = ""
 
+control = 'stop'
+
 running = True
 while running:
 
@@ -74,10 +76,7 @@ while running:
 
         if dist <= 6:
             if motor_status == 'active':
-                robot.motor1.throttle = 0 # Right side wheels
-                robot.motor2.throttle = 0
-                robot.motor3.throttle = 0 # Left side wheels are turned opposite to the right side wheels
-                robot.motor4.throttle = 0
+                control = 'stop'
 
     if imu_status == 'active':
         ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
@@ -101,14 +100,30 @@ while running:
     server.send(msg)
     time.sleep(.3)
 
-    #control = server.receive()
+    print('here')
+    control = server.receive()
+
+    print(control)
 
     if motor_status == 'active':
+        '''
         # Wheels are turned at the same ratio as the joystick is held
         robot.motor1.throttle = control # Right side wheels
         robot.motor2.throttle = control
         robot.motor3.throttle = -control # Left side wheels are turned opposite to the right side wheels
         robot.motor4.throttle = -control
+        '''
+
+        if control == 'forward':
+            robot.motor1.throttle = .6
+            robot.motor2.throttle = .6
+            robot.motor3.throttle = .6
+            robot.motor4.throttle = .6
+        elif control == 'stop':
+            robot.motor1.throttle = 0
+            robot.motor2.throttle = 0
+            robot.motor3.throttle = 0
+            robot.motor4.throttle = 0
 
     msg = ""
 

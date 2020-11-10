@@ -28,6 +28,7 @@ class Server():
 
     def receive(self):
         data = self.conn.recv(1024)
+        print('data received')
         msg = data.decode("utf-8")
         if len(msg) > 0:
             return msg
