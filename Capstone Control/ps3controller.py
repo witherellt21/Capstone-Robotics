@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import pygame
-from pygame.locals import *
 
 class Controller:
 
@@ -30,7 +29,7 @@ class Controller:
 
             self.g_keys = pygame.event.get()
 
-            print(self.my_joystick.get_axis(0))
+            print('%+3.3f' % (self.my_joystick.get_axis(0)))
 
     def quit(self):
         pygame.display.quit()
