@@ -27,8 +27,10 @@ class Controller:
 
         while (True):
 
-            self.g_keys = pygame.event.get()
+            # Pump events
+            pygame.event.get()
 
+            # Display axis values
             ax = self.my_joystick.get_axis
             print('0:%+3.3f  1:%+3.3f  2:%+3.3f  3:%+3.3f' % (ax(0), ax(1), ax(2), ax(3)))
 
