@@ -32,6 +32,14 @@ class Controller:
             self.joystick = pygame.joystick.Joystick(0)
             self.joystick.init()
 
+    def get_axes(self):
+        right_horiz = self.joystick.get_axis(0)
+        right_vert = self.joystick.get_axis(1)
+        left_horiz = self.joystick.get_axis(2)
+        left_vert = self.joystick.get_axis(3)
+
+        return left_horiz, left_vert
+
     def run(self):
 
         while (True):

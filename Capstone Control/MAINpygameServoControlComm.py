@@ -3,11 +3,22 @@ import pygame
 import math
 from getData import Receiver
 from pygamePieces import Robot, Barrier
-from xboxControl import Controller
+from ps3controller import Controller
+from PIL import ImageFont
+
+
+server_status = "inactive"
+pygame_status = "active"
+controller_status = "active"
+data_status = 'GUI'
+
+white = (255, 255, 255) 
+green = (0, 255, 0) 
+blue = (0, 0, 128)
+black = (0, 0, 0)
 
 # ---------------- Initialize Pygame -----------------
 pygame.init()
-screen = pygame.display.set_mode((600, 600))
 
 def drawDivider(x, y, Color):
     pygame.draw.rect(screen, Color, (x, y, 10, 900),0)
@@ -18,32 +29,41 @@ def barrierExists(barrierList, x, y):
             return True
     return False
 
+def displayText(text, font, x, y):
+    txt = font.render(text, True, white, black)
+    textRect = txt.get_rect()
+    center = textRect.width/2
+    x -= center
+    textRect.center = (x, y)
+    screen.blit(txt, textRect)
+    
+
 
 # ---------------- Initialize Pygame Pieces -----------------
-robotX = 800
-robotY = 800
+if pygame_status == "active":
+    screen = pygame.display.set_mode((1400, 900))
 
-robot = Robot(screen, robotX, robotY)
+    robotX = 800
+    robotY = 800
+    robot_angle = 0
 
-y_change = 0
-x_change = 0
+    robot = Robot(screen, robotX, robotY)
 
-barrierList = []
+    y_change = 0
+    x_change = 0
+
+    barrierList = []
+
+    font = pygame.font.Font('freesansbold.ttf', 32) 
 
 
 # ---------------- Initialize Receiver/Server -----------------
-try:
-    IP = '192.168.0.3'
+if server_status == "active":
+
+    IP = '192.168.2.2'
     PORT = 10000
     r = Receiver(IP, PORT)
-except:
-    try:
-        IP = '192.168.0.3'
-        PORT = 10001
-        r = Receiver(IP, PORT)
-    except:
-        pass
-r.client.connect()
+    r.client.connect()
 
 
 # ---------------- Initialize Variables -----------------
@@ -54,8 +74,10 @@ sonar_data = 0
 
 message = ''
 
-#c = Controller()
+if controller_status == "active":
+    c = Controller()
 
+print('Beginning Simulation... \n\n')
 
 # ---------------- Begin Mainloop -----------------
 running = True
@@ -65,149 +87,130 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.KEY_UP:
-                message = 'forward'
-
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.KEY_UP:
-                message = 'stop'
-
-        if event.type == pygame.JOYBUTTONDOWN:
-            # 0 = A
-            # 1 = B
-            # 2 = X
-            # 3 = Y
-            pass
-
         if event.type == pygame.JOYHATMOTION:
             if event.value[0] == 1:
                 print('hello')
             if event.value[0] == -1:
                 print('yo')
 
-    '''
-    for j in joysticks:
-        x_change = j.get_axis(LEFT_X)
-        y_change = j.get_axis(LEFT_Y)
-        if abs(x_change) <= 0.1:
-            x_change = 0
-        if abs(y_change) <= 0.1:
-            y_change = 0
+    if controller_status == "active":
+        x_axis, y_axis = c.get_axes()
 
+        y_axis = - y_axis
 
-        print(j.get_axis(RIGHT_X))
-        print(j.get_axis(RIGHT_Y))
-    '''
+        if abs(x_axis) < 0.08:
+            x_axis = 0
+        if abs(y_axis) < 0.08:
+            y_axis = 0
 
-    screen.fill((0,0,0))
+        if c.joystick.get_button(6):
+            robot_angle += 2
+        if c.joystick.get_button(7):
+            robot_angle -= 2
 
-    r.receive()
+        angle = robot_angle / 180 * math.pi
+        
+        x_change = - y_axis * math.sin(angle)
+        y_change = - y_axis * math.cos(angle)
 
-    data = r.datalist
-
-    #print(data)
-    #print('\n')
+        x_change *= 3
+        y_change *= 3
 
     
-    #GET TEMPERATURE DATA
-    #temp_data = r.getTemp(temp_data)
+    if server_status == "active":
+        
+        r.receive()
 
-    #GET ACCELEROMETER DATA
-    accel_data = r.getAccel(accel_data)
-    a_datalist = accel_data.split(',')
-    ax = a_datalist[0].strip('[')
-    ay = a_datalist[1]
-    az = a_datalist[2].strip(']')
+        data = r.datalist
+        
+        #GET TEMPERATURE DATA
+        #temp_data = r.getTemp(temp_data)
 
-    print('\n')
-    print('ax =', ax)
-    print('ay =', ay)
-    print('az =', az)
+        #GET ACCELEROMETER DATA
+        accel_data = r.getAccel(accel_data)
+        a_datalist = accel_data.split(',')
+        ax = a_datalist[0].strip('[')
+        ay = a_datalist[1]
+        az = a_datalist[2].strip(']')
+
+        #GET GYROSCOPE DATA
+        gyro_data = r.getGyro(gyro_data)
+        g_datalist = gyro_data.split(',')
+        gx = g_datalist[0].strip('[')
+        gy = g_datalist[1]
+        gz = g_datalist[2].strip(']')
+        
+        if 'sonar' in g_datalist[2]:
+            gz = g_datalist[2].strip(']sonar')
+        else: gz = g_datalist[2].strip(']')
+
+        #GET SONAR DATA
+        sonar_data = str(r.getSonar(sonar_data))
+
+        if data_status == 'printing':
+            print('\n')
+            print('ax =', ax)
+            print('ay =', ay)
+            print('az =', az)
+
+            print('\n')
+            print('gx =', gx)
+            print('gy =', gy)
+            print('gz =', gz)
+            
+            print('\n')
+            print('temp = ', temp_data)
+            print('sonar = ', sonar_data)
+        
+
+    if pygame_status == "active":
+        screen.fill(black)
+        
+        robot.y += y_change
+        robot.x += x_change
+
+        drawDivider(945, 0, (255, 255, 255))
+        robot.draw(robot_angle)
+
+        barrierX = 740
+        barrierY = 700
+
+        if not barrierExists(barrierList, barrierX, barrierY):
+            #barrier = Barrier(screen, barrierX, barrierY, 5, 5)
+            barrier = Barrier(screen, barrierX, barrierY, 10, 40)
+            #barrier = pygame.draw.rect(screen, (255, 255, 255), (780, 600, 40, 10),0)
+            barrierList.append(barrier)
+
+        for b in barrierList:
+            b.draw()
+            robot.displayWarnings(b)
+
+        if server_status == 'active':
+
+            if data_status == 'GUI':
+                ax_string = 'ax = ' + ax
+                displayText(ax_string, font, 1230, 50)
+                ay_string = 'ay = ' + ay
+                displayText(ay_string, font, 1230, 130)
+                az_string = 'az = ' + az
+                displayText(az_string, font, 1230, 210)
+                gx_string = 'gx = ' + gx
+                displayText(gx_string, font, 1230, 290)
+                gy_string = 'gy = ' + gy
+                displayText(gy_string, font, 1230, 370)
+                gz_string = 'gz = ' + gz
+                displayText(gz_string, font, 1230, 450)
+                
+                sonar_string = 'dist = ' + sonar_data
+                displayText(sonar_string, font, 1230, 530)
+
+            if sonar_data < 6:
+                warning_string = 'You are too close to a barrier'
+                displayText(warning_string, font, 50, 50)
+                
 
 
-    #GET GYROSCOPE DATA
-    gyro_data = r.getGyro(gyro_data)
-    g_datalist = gyro_data.split(',')
-    gx = g_datalist[0].strip('[')
-    gy = g_datalist[1]
-    gz = g_datalist[2].strip(']')
-    
-    if 'sonar' in g_datalist[2]:
-        gz = g_datalist[2].strip(']sonar')
-    else: gz = g_datalist[2].strip(']')
-    
-    print('\n')
-    print('gx =', gx)
-    print('gy =', gy)
-    print('gz =', gz)
-
-    #GET SONAR DATA
-    sonar_data = r.getSonar(sonar_data)
-
-    print('\n')
-    print('temp = ', temp_data)
-    print('sonar = ', sonar_data)
-    
-    
-    time.sleep(.1)
-
-
-
-    '''
-
-    if control == 'forward':
-        robot.direction = 'up'
-        bl.forward()
-        y_change = -2
-
-    elif control == 'backward':
-        robot.direction = 'down'
-        bl.backward()
-        y_change = 2
-
-    elif control == 'left':
-        robot.direction = 'left'
-        x_change = -2
-
-    elif control == 'right':
-        robot.direction = 'right'
-        x_change = 2
-
-    elif control == 'stop':
-        auto.park()
-        y_change = 0
-        x_change = 0
-    '''
-
-    '''
-    robot.y += y_change
-    robot.x += x_change
-
-    drawDivider(945, 0, (255, 255, 255))
-    robot.draw()
-
-    barrierX = 740
-    barrierY = 700
-
-
-    if not barrierExists(barrierList, barrierX, barrierY):
-        barrier = Barrier(screen, barrierX, barrierY, 5, 5)
-        #barrier = Barrier(screen, barrierX, barrierY, 10, 40)
-        #barrier = pygame.draw.rect(screen, (255, 255, 255), (780, 600, 40, 10),0)
-        barrierList.append(barrier)
-
-    for b in barrierList:
-        b.draw()
-
-        robot.displayWarnings(b)
-        #if d < 100:
-            #robot.getDirection(barrier, d)
-        #if isCollision(robot.x, robot.y, barrier.x, barrier.y):
-        #    displayWarningUp(robot.x, robot.y)
-    '''
-
-    r.client.send(message)
+    #r.client.send(message)
     
     pygame.display.update()
     time.sleep(0.001)
