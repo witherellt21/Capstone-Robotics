@@ -11,7 +11,7 @@ class Controller:
         # Set up the joystick
         pygame.joystick.init()
 
-        self.my_joystick = None
+        self.joystick = None
         self.joystick_names = []
 
         # Enumerate joysticks
@@ -20,8 +20,8 @@ class Controller:
 
         # By default, load the first available joystick.
         if (len(self.joystick_names) > 0):
-            self.my_joystick = pygame.joystick.Joystick(0)
-            self.my_joystick.init()
+            self.joystick = pygame.joystick.Joystick(0)
+            self.joystick.init()
 
     def run(self):
 
@@ -31,9 +31,16 @@ class Controller:
             pygame.event.get()
 
             # Display axis values
-            ax = self.my_joystick.get_axis
-            print('0:%+3.3f  1:%+3.3f  2:%+3.3f  3:%+3.3f' % (ax(0), ax(1), ax(2), ax(3)))
+            for k in range(self.joystick.get_numaxes()):
+                print('%d:%+3.3f' % (k, self.joystick.get_axis(k)), end=' ')
 
+            print(' | ', end='')
+           
+            # Display button values
+            for k in range(self.joystick.get_numbuttons()):
+                print('%2d:%d' % (k, self.joystick.get_button(k)), end=' ')
+
+            print()
 
     def quit(self):
         pygame.display.quit()
