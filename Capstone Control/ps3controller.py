@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+'''
+Filename: ps3controller.py
+
+Author: Taylor Witherell
+
+Description: Class and tested for ps3 controller support to be integrated
+                with robot control mechanism
+'''
+
 import pygame
 
 class Controller:
