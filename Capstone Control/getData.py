@@ -31,6 +31,13 @@ class Receiver():
                 except: return last
         return last
 
+    def getIR(self, last):
+        for data in self.datalist:
+            if 'ir' in data:
+                try: return int(data.split('=')[1].strip())
+                except: return last
+        return last
+
 
     def getSonar(self, last):
         for data in self.datalist:

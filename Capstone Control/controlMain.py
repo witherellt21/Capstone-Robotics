@@ -17,7 +17,7 @@ from PIL import ImageFont
 server_status = "active"
 pygame_status = "active"
 controller_status = "active"
-data_status = 'None'
+data_status = 'GUI'
 
 white = (255, 255, 255) 
 green = (0, 255, 0) 
@@ -78,6 +78,7 @@ temp_data = 0
 accel_data = ''
 gyro_data = ''
 sonar_data = 0
+ir_data = 1
 
 message = ''
 
@@ -133,6 +134,12 @@ while running:
         #GET TEMPERATURE DATA
         #temp_data = r.getTemp(temp_data)
 
+        #GET SONAR DATA
+        sonar_data = str(r.getSonar(sonar_data))
+
+        #GET IR PROXIMITY DATA
+        ir_data = r.getIR(ir_data)
+
         #GET ACCELEROMETER DATA
         accel_data = r.getAccel(accel_data)
         a_datalist = accel_data.split(',')
@@ -150,9 +157,7 @@ while running:
         if 'sonar' in g_datalist[2]:
             gz = g_datalist[2].strip(']sonar')
         else: gz = g_datalist[2].strip(']')
-
-        #GET SONAR DATA
-        sonar_data = str(r.getSonar(sonar_data))
+        
 
         if data_status == 'printing':
             print('\n')
@@ -207,14 +212,17 @@ while running:
                 displayText(gy_string, font, 1230, 370)
                 gz_string = 'gz = ' + gz
                 displayText(gz_string, font, 1230, 450)
-                
                 sonar_string = 'dist = ' + sonar_data
                 displayText(sonar_string, font, 1230, 530)
-
-            if float(sonar_data) < 6:
+            
+            if float(sonar_data) < 6 or not ir_data:
                 warning_string = 'You are too close to a barrier'
                 displayText(warning_string, font, 600, 50)
-                
+            '''
+            if not ir_data:
+                warning_string = 'You are too close to a barrier'
+                displayText(warning_string, font, 600, 50)
+            '''  
 
 
     #r.client.send(message)
