@@ -14,10 +14,10 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 
-server_status = "inactive"
+server_status = "active"
 pygame_status = "active"
 controller_status = "active"
-data_status = 'GUI'
+data_status = 'None'
 
 white = (255, 255, 255) 
 green = (0, 255, 0) 
@@ -211,9 +211,9 @@ while running:
                 sonar_string = 'dist = ' + sonar_data
                 displayText(sonar_string, font, 1230, 530)
 
-            if sonar_data < 6:
+            if float(sonar_data) < 6:
                 warning_string = 'You are too close to a barrier'
-                displayText(warning_string, font, 50, 50)
+                displayText(warning_string, font, 600, 50)
                 
 
 
