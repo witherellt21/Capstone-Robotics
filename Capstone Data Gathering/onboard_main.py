@@ -87,10 +87,14 @@ while running:
         # If client disconnects from server, reconnect
         if server.disconnect_counter > 0:
             server.receiveConnection()
-        server.send(msg)
-        #control = server.receive()
 
-        #print(control)
+        # Send sensor data to client
+        server.send(msg)
+
+        # Receive control data from client
+        control = server.receive()
+
+        print(control)
 
         if motors_running:
             '''
@@ -101,6 +105,7 @@ while running:
             robot.motor4.throttle = -control
             '''
 
+            '''
             if control == 'forward':
                 robot.motor1.throttle = .6
                 robot.motor2.throttle = .6
@@ -110,7 +115,8 @@ while running:
                 robot.motor1.throttle = 0
                 robot.motor2.throttle = 0
                 robot.motor3.throttle = 0
-                robot.motor4.throttle = 0
+                robot.motor4.throttle = 0\
+            '''
     msg = ""
 
 print('done')
