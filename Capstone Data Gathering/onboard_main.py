@@ -17,7 +17,7 @@ sonar_activated = True
 imu_activated = True
 ir_sensor_activated = True
 motors_running = False
-server_online = False
+server_online = True
 
 
 # ---------------- Initialize Server -----------------
@@ -56,6 +56,7 @@ dist = ''
 temp = ''
 gyro = ''
 acc = ''
+ir_status = 1
 msg = ''
 
 control = 'stop'
@@ -76,12 +77,11 @@ while running:
             temp, acc, gyro = imu.read_ag()   # Get IMU data
 
     if ir_sensor_activated:
-        print(ir.status())   # Print status of proximity sensor
+        ir_status = ir.status()   # Print status of proximity sensor
 
     # Compile a data string to send to the client
     msg = "sonar = " + str(dist) + ",, temp = " + str(temp) + ",, accel = " + str(acc) + \
-            ",, gyro = " + str(gyro) + ",, ir = " + str(ir.status())
-    print(msg)
+            ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status)
 
     if server_online:
         # If client disconnects from server, reconnect
@@ -111,7 +111,6 @@ while running:
                 robot.motor2.throttle = 0
                 robot.motor3.throttle = 0
                 robot.motor4.throttle = 0
-    time.sleep(1)
     msg = ""
 
 print('done')
