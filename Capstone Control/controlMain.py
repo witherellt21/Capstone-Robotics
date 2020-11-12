@@ -102,15 +102,22 @@ while running:
                 print('yo')
 
     if controller_status == "active":
+        
+        # Use start button to quit simulation
+        if c.joystick.get_button(9):
+            running = False
+        
+        # Get joystick values for drive control
         x_axis, y_axis = c.get_axes()
-
         y_axis = - y_axis
 
+        # Decrease sensitivity
         if abs(x_axis) < 0.08:
             x_axis = 0
         if abs(y_axis) < 0.08:
             y_axis = 0
 
+        # Get trigger data to control turning
         if c.joystick.get_button(6):
             robot_angle += 2
         if c.joystick.get_button(7):
@@ -123,6 +130,10 @@ while running:
 
         x_change *= 3
         y_change *= 3
+
+        # Add controller input to control message
+        message += str(y_axis)
+
 
     
     if server_status == "active":
@@ -222,10 +233,13 @@ while running:
             if not ir_data:
                 warning_string = 'You are too close to a barrier'
                 displayText(warning_string, font, 600, 50)
-            '''  
+            '''
+
+    if server_status == "active":
+        r.client.send(message)
 
 
-    #r.client.send(message)
+    message = ''
     
     pygame.display.update()
     time.sleep(0.001)
