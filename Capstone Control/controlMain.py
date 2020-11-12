@@ -131,6 +131,9 @@ while running:
         x_change *= 3
         y_change *= 3
 
+        # Add controller input to control message
+        message += str(y_axis)
+
 
     
     if server_status == "active":
@@ -230,10 +233,13 @@ while running:
             if not ir_data:
                 warning_string = 'You are too close to a barrier'
                 displayText(warning_string, font, 600, 50)
-            '''  
+            '''
+
+    if server_status == "active":
+        r.client.send(message)
 
 
-    #r.client.send(message)
+    message = ''
     
     pygame.display.update()
     time.sleep(0.001)
