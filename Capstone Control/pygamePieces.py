@@ -3,11 +3,12 @@ import pygame
 
 class Robot():
 
-    def __init__(self, screen, x, y):
+    def __init__(self, screen, x, y, height, width, color):
         self.x = x
         self.y = y
-        self.height = 20
-        self.width = 20
+        self.height = height
+        self.width = width
+        self.color = color
         self.screen = screen
         self.direction = 'up'
         self.center = (self.x, self.y)
@@ -34,7 +35,7 @@ class Robot():
             coordinates = [(self.x - self.width/2, self.y - self.height/2), point_of_triangle, (self.x + self.width/2, self.y - self.height/2)]
         '''
         #pygame.draw.rect(self.screen, (255, 255, 255), (self.x, self.y, self.width, self.height),0)
-        pygame.draw.polygon(self.screen, (255, 255, 255), coordinates)
+        pygame.draw.polygon(self.screen, self.color, coordinates)
 
     def getDistance(self, barrier, direction):
         if direction == 'up' or direction == 'down':

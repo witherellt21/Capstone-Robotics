@@ -38,7 +38,7 @@ class Controller:
         left_horiz = self.joystick.get_axis(2)
         left_vert = self.joystick.get_axis(3)
 
-        return left_horiz, left_vert
+        return right_horiz, left_horiz, left_vert
 
     def run(self):
 

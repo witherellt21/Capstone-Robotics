@@ -14,10 +14,10 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 
-server_status = "active"
+server_status = "inactive"
 pygame_status = "active"
 controller_status = "active"
-data_status = 'GUI'
+data_status = 'None'
 
 white = (255, 255, 255) 
 green = (0, 255, 0) 
@@ -53,8 +53,10 @@ if pygame_status == "active":
     robotX = 800
     robotY = 800
     robot_angle = 0
+    scanner_angle = 0
 
-    robot = Robot(screen, robotX, robotY)
+    robot = Robot(screen, robotX, robotY, 35, 35, (255, 255, 255))
+    scanner = Robot(screen, robotX, robotY, 20, 20, (0, 0, 255))
 
     y_change = 0
     x_change = 0
@@ -108,7 +110,7 @@ while running:
             running = False
         
         # Get joystick values for drive control
-        x_axis, y_axis = c.get_axes()
+        scan_axis, x_axis, y_axis = c.get_axes()
         y_axis = - y_axis
 
         # Decrease sensitivity
@@ -116,12 +118,18 @@ while running:
             x_axis = 0
         if abs(y_axis) < 0.08:
             y_axis = 0
+        if abs(scan_axis) < 0.08:
+            scan_axis = 0
 
         # Get trigger data to control turning
         if c.joystick.get_button(6):
             robot_angle += 2
+            scanner_angle += 2
         if c.joystick.get_button(7):
             robot_angle -= 2
+            scanner_angle -= 2
+
+        #if c.joystick.get_button(
 
         angle = robot_angle / 180 * math.pi
         
@@ -131,8 +139,11 @@ while running:
         x_change *= 3
         y_change *= 3
 
+        scanner_angle -= 2*scan_axis
+
         # Add controller input to control message
         message += str(y_axis)
+        
 
 
     
@@ -191,9 +202,12 @@ while running:
         
         robot.y += y_change
         robot.x += x_change
+        scanner.y += y_change
+        scanner.x += x_change
 
         drawDivider(945, 0, (255, 255, 255))
         robot.draw(robot_angle)
+        scanner.draw(scanner_angle)
 
         barrierX = 740
         barrierY = 700
