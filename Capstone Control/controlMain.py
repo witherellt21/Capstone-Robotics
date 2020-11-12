@@ -63,7 +63,8 @@ if pygame_status == "active":
 
     barrierList = []
 
-    font = pygame.font.Font('freesansbold.ttf', 32) 
+    font = pygame.font.Font('freesansbold.ttf', 32)
+    font_24 = pygame.font.Font('freesansbold.ttf', 24) 
 
 
 # ---------------- Initialize Receiver/Server -----------------
@@ -84,12 +85,25 @@ ir_data = 1
 
 message = ''
 
+
+# ---------------- Initialize Controller -----------------
 if controller_status == "active":
     c = Controller()
 
+control_mode = "user-controlled"
+
+
+# ------------------- Configure Robot --------------------
+
+arm_vert_axis = 0
+arm_horiz_axis = 0
+
+claw_open = True
+
+
+# -------------------- Begin Mainloop --------------------
 print('Beginning Simulation... \n\n')
 
-# ---------------- Begin Mainloop -----------------
 running = True
 while running:
 
@@ -98,10 +112,19 @@ while running:
             running = False
 
         if event.type == pygame.JOYHATMOTION:
+            #print(event.value)
+            arm_vert_axis = event.value[1]
+            arm_horiz_axis = event.value[0]
+            '''
             if event.value[0] == 1:
                 print('hello')
             if event.value[0] == -1:
                 print('yo')
+            if event.value[1] == 1:
+                print('hello')
+            if event.value[1] == -1:
+                print('yo')
+            '''
 
     if controller_status == "active":
         
@@ -113,14 +136,6 @@ while running:
         scan_axis, x_axis, y_axis = c.get_axes()
         y_axis = - y_axis
 
-        # Decrease sensitivity
-        if abs(x_axis) < 0.08:
-            x_axis = 0
-        if abs(y_axis) < 0.08:
-            y_axis = 0
-        if abs(scan_axis) < 0.08:
-            scan_axis = 0
-
         # Get trigger data to control turning
         if c.joystick.get_button(6):
             robot_angle += 2
@@ -129,7 +144,47 @@ while running:
             robot_angle -= 2
             scanner_angle -= 2
 
-        #if c.joystick.get_button(
+        # Set robot to autonomous mode
+        if c.joystick.get_button(8):
+            time.sleep(0.3)
+            if control_mode == "user-controlled":
+                control_mode = "autonomous"
+            else:
+                control_mode = "user-controlled"
+
+        # Control arm movements using D-pad
+        if arm_vert_axis:
+            if arm_vert_axis > 0:
+                print('move arm up')
+            else:
+                print('move arm down')
+        if arm_horiz_axis:
+            if arm_horiz_axis > 0:
+                print('move arm right')
+            else:
+                print('move arm left')
+
+
+        # Pick up item using Triangle button
+        if c.joystick.get_button(0):
+            if claw_open:
+                claw_open = False
+                print('\nPick up item\n')
+            else:
+                print('\nDrop item\n')
+                claw_open = True
+            time.sleep(0.1)
+        
+        #print(arm_vert_axis)
+            
+
+        # Decrease sensitivity
+        if abs(x_axis) < 0.08:
+            x_axis = 0
+        if abs(y_axis) < 0.08:
+            y_axis = 0
+        if abs(scan_axis) < 0.08:
+            scan_axis = 0
 
         angle = robot_angle / 180 * math.pi
         
@@ -221,6 +276,11 @@ while running:
         for b in barrierList:
             b.draw()
             robot.displayWarnings(b)
+
+        # Display message when in autonomous mode
+        if control_mode == "autonomous":
+            mode_string = 'Mode: Autonomous'
+            displayText(mode_string, font_24, 800, 50)
 
         if server_status == 'active':
 
