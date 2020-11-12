@@ -16,10 +16,7 @@ class Receiver():
         msg = self.client.receive()
         #msg = 'accel = 20, sonar = 30, temp = 70'
         if not msg == None:
-            #print(msg)
             self.separateData(msg)
-        #if self.server.disconnect_counter == 5:
-            #self.server.receiveConnection()
 
     def send(self, string):
         self.client.send(string)

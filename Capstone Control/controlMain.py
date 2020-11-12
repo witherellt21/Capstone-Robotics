@@ -1,3 +1,10 @@
+'''
+Filename: controlMain.py
+
+Author: Taylor Witherell
+
+'''
+
 import time
 import pygame
 import math
