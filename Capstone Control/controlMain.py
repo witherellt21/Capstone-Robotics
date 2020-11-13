@@ -108,8 +108,13 @@ claw_open = True
 # -------------------- Begin Mainloop --------------------
 print('Beginning Simulation... \n\n')
 
+elapsedList = []
+launch = time.time()
+
 running = True
 while running:
+
+    start = time.time()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -304,7 +309,19 @@ while running:
     if server_online:
         r.client.send(message)
         message = ''
+
+    elapsed = time.time() - start
+    elapsedList.append(elapsed)
+
+    if time.time() - launch >= 60:
+        running = False
         
     time.sleep(0.001)
+
+total = 0
+for time in elapsedList:
+    total += time
+
+print('Average Elapsed Time: ', total/len(elapsedList))
 
 pygame.quit()
