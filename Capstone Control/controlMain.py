@@ -15,7 +15,7 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = False
+server_online = True
 pygame_running = True
 controller_connected = True
 data_status = 'GUI'
@@ -74,7 +74,7 @@ if pygame_running:
 if server_online:
     # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
-    PORT = 10000
+    PORT = 10001
     r = Receiver(IP, PORT)
     r.client.connect()
 
@@ -109,6 +109,11 @@ claw_open = True
 print('Beginning Simulation... \n\n')
 
 elapsedList = []
+controllerList = []
+serverList = []
+pygameList = []
+
+
 launch = time.time()
 
 running = True
@@ -124,6 +129,7 @@ while running:
             arm_vert_axis = event.value[1]
             arm_horiz_axis = event.value[0]
 
+    controller_start = time.time()
     if controller_connected:
         
         # Use start button to quit simulation
@@ -184,26 +190,18 @@ while running:
         if abs(scan_axis) < 0.08:
             scan_axis = 0
 
-        # Convert angle output to radians
-        angle = robot_angle / 180 * math.pi
-
-        # Adjust translational movements based on direction        
-        x_change = - y_axis * math.sin(angle)
-        y_change = - y_axis * math.cos(angle)
-
-        x_change *= 3
-        y_change *= 3
-
-        # Change direction that robot is looking
-        scanner_angle -= 2*scan_axis
-
         # Add controller input to control message
         message += str(y_axis)
+
+    controllerList.append(time.time() - controller_start)
         
-    
+
+    server_start = time.time()
+                          
     if server_online:
         
         r.receive()
+        serverList.append(time.time() - server_start)
 
         data = r.datalist
         
@@ -249,10 +247,24 @@ while running:
             print('\n')
             print('temp = ', temp_data)
             print('sonar = ', sonar_data)
-        
 
+    pygame_start = time.time()
     if pygame_running:
+        
         screen.fill(black)
+
+        # Convert angle output to radians
+        angle = robot_angle / 180 * math.pi
+
+        # Adjust translational movements based on direction        
+        x_change = - y_axis * math.sin(angle)
+        y_change = - y_axis * math.cos(angle)
+
+        x_change *= 3
+        y_change *= 3
+
+        # Change direction that robot is looking
+        scanner_angle -= 2*scan_axis
         
         robot.y += y_change
         robot.x += x_change
@@ -306,6 +318,8 @@ while running:
             
         pygame.display.update()
 
+    pygameList.append(time.time() - pygame_start)
+
     if server_online:
         r.client.send(message)
         message = ''
@@ -322,6 +336,21 @@ total = 0
 for time in elapsedList:
     total += time
 
+controller_total = 0
+for time in controllerList:
+    controller_total += time
+                
+server_total = 0
+for time in serverList:
+    server_total += time
+
+pygame_total = 0
+for time in pygameList:
+    pygame_total += time
+                          
 print('Average Elapsed Time: ', total/len(elapsedList))
+print('Average Elapsed Time for controller code: ', controller_total/len(controllerList))
+print('Average Elapsed Time for server code: ', server_total/len(serverList))
+print('Average Elapsed Time for pygame code: ', pygame_total/len(pygameList))
 
 pygame.quit()

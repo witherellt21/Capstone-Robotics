@@ -23,7 +23,7 @@ class Receiver():
 
     def separateData(self, msg):
         self.datalist = msg.split(',,')
-
+    '''
     def getIMU(self, last):
         for data in self.datalist:
             if 'IMU' in data:
@@ -64,6 +64,33 @@ class Receiver():
 
         #if len(self.datalist) > 0:
             #return self.datalist[0].strip()
+    '''
+    def getIMU(self, last):
+        for data in self.datalist:
+            if 'IMU' in data:
+                try: return float(data.split('=')[1].strip())
+                except: return last
+        return last
+
+    def getIR(self, last):
+        try: return int(self.datalist[4].split('=')[1].strip())
+        except: return last
+
+
+    def getSonar(self, last):
+        try: return float(self.datalist[0].split('=')[1].strip())
+        except: return last
+
+
+    def getGyro(self, last):
+        try: return self.datalist[3].split('=')[1].strip()
+        except: return last
+
+
+    def getAccel(self, last):
+        try: return self.datalist[2].split('=')[1].strip()
+        except: return last
+        
 
     def getAllData(self):
         if len(self.datalist) > 2:
