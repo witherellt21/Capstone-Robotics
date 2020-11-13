@@ -3,6 +3,7 @@ Filename: controlMain.py
 
 Author: Taylor Witherell
 
+Description:  Main running loop for control/operator side of the robot
 '''
 
 import time
@@ -13,16 +14,18 @@ from pygamePieces import Robot, Barrier
 from ps3controller import Controller
 from PIL import ImageFont
 
+# Toggle simulation elements
+server_online = False
+pygame_running = True
+controller_connected = True
+data_status = 'GUI'
 
-server_status = "inactive"
-pygame_status = "active"
-controller_status = "active"
-data_status = 'None'
-
+# Color List
 white = (255, 255, 255) 
 green = (0, 255, 0) 
 blue = (0, 0, 128)
 black = (0, 0, 0)
+
 
 # ---------------- Initialize Pygame -----------------
 pygame.init()
@@ -47,7 +50,7 @@ def displayText(text, font, x, y):
 
 
 # ---------------- Initialize Pygame Pieces -----------------
-if pygame_status == "active":
+if pygame_running:
     screen = pygame.display.set_mode((1400, 900))
 
     robotX = 800
@@ -68,8 +71,8 @@ if pygame_status == "active":
 
 
 # ---------------- Initialize Receiver/Server -----------------
-if server_status == "active":
-
+if server_online:
+    # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
     PORT = 10000
     r = Receiver(IP, PORT)
@@ -87,9 +90,10 @@ message = ''
 
 
 # ---------------- Initialize Controller -----------------
-if controller_status == "active":
+if controller_connected:
     c = Controller()
 
+# Set control mode to either "user-controlled" or "automated
 control_mode = "user-controlled"
 
 
@@ -112,21 +116,10 @@ while running:
             running = False
 
         if event.type == pygame.JOYHATMOTION:
-            #print(event.value)
             arm_vert_axis = event.value[1]
             arm_horiz_axis = event.value[0]
-            '''
-            if event.value[0] == 1:
-                print('hello')
-            if event.value[0] == -1:
-                print('yo')
-            if event.value[1] == 1:
-                print('hello')
-            if event.value[1] == -1:
-                print('yo')
-            '''
 
-    if controller_status == "active":
+    if controller_connected:
         
         # Use start button to quit simulation
         if c.joystick.get_button(9):
@@ -186,23 +179,24 @@ while running:
         if abs(scan_axis) < 0.08:
             scan_axis = 0
 
+        # Convert angle output to radians
         angle = robot_angle / 180 * math.pi
-        
+
+        # Adjust translational movements based on direction        
         x_change = - y_axis * math.sin(angle)
         y_change = - y_axis * math.cos(angle)
 
         x_change *= 3
         y_change *= 3
 
+        # Change direction that robot is looking
         scanner_angle -= 2*scan_axis
 
         # Add controller input to control message
         message += str(y_axis)
         
-
-
     
-    if server_status == "active":
+    if server_online:
         
         r.receive()
 
@@ -252,7 +246,7 @@ while running:
             print('sonar = ', sonar_data)
         
 
-    if pygame_status == "active":
+    if pygame_running:
         screen.fill(black)
         
         robot.y += y_change
@@ -282,7 +276,7 @@ while running:
             mode_string = 'Mode: Autonomous'
             displayText(mode_string, font_24, 800, 50)
 
-        if server_status == 'active':
+        if server_online:
 
             if data_status == 'GUI':
                 ax_string = 'ax = ' + ax
@@ -299,23 +293,18 @@ while running:
                 displayText(gz_string, font, 1230, 450)
                 sonar_string = 'dist = ' + sonar_data
                 displayText(sonar_string, font, 1230, 530)
-            
+
+            # If robot detects an obstacle in close proximity, display message
             if float(sonar_data) < 6 or not ir_data:
                 warning_string = 'You are too close to a barrier'
                 displayText(warning_string, font, 600, 50)
-            '''
-            if not ir_data:
-                warning_string = 'You are too close to a barrier'
-                displayText(warning_string, font, 600, 50)
-            '''
+            
+        pygame.display.update()
 
-    if server_status == "active":
+    if server_online:
         r.client.send(message)
-
-
-    message = ''
-    
-    pygame.display.update()
+        message = ''
+        
     time.sleep(0.001)
 
 pygame.quit()
