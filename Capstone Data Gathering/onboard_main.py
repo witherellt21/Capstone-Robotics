@@ -92,7 +92,7 @@ while running:
         server.send(msg)
 
         # Receive control data from client
-        control = server.receive()
+        #control = server.receive()
 
         #print(control)
 
