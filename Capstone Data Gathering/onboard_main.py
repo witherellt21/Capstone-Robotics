@@ -24,7 +24,7 @@ server_online = True
 if server_online:
     # Set the client to the server's IP and PORT address
     IP = '192.168.2.2'
-    PORT = 10000
+    PORT = 10001
     server = Server(IP, PORT)
 
     server.start()
@@ -94,7 +94,7 @@ while running:
         # Receive control data from client
         control = server.receive()
 
-        print(control)
+        #print(control)
 
         if motors_running:
             '''
