@@ -25,13 +25,30 @@ white = (255, 255, 255)
 green = (0, 255, 0) 
 blue = (0, 0, 128)
 black = (0, 0, 0)
+grey = (200, 200, 200)
+
+# GUI Attributes
+height = 800
+width = 1400
+
+sim_height = height/2
+sim_width = height/2
+sim_x = 0
+sim_y = 0
+robot_height = robot_width = sim_height * 4/90
+scanner_height = scanner_width = sim_height * 2/90
+
+dist_height = sim_height
+dist_width = sim_width
+dist_x = sim_x
+dist_y = sim_y + sim_height
 
 
 # ---------------- Initialize Pygame -----------------
 pygame.init()
 
-def drawDivider(x, y, Color):
-    pygame.draw.rect(screen, Color, (x, y, 10, 900),0)
+def drawDivider():
+    pygame.draw.rect(sim_surface, (255,255,255), (sim_width*2/3, sim_y, sim_width/100, sim_height),0)
 
 def barrierExists(barrierList, x, y):
     for barrier in barrierList:
@@ -39,32 +56,44 @@ def barrierExists(barrierList, x, y):
             return True
     return False
 
-def displayText(text, font, x, y):
-    txt = font.render(text, True, white, black)
+def displayText(surface, text, font, x, y, color, background):
+    txt = font.render(text, True, color, background)
     textRect = txt.get_rect()
     center = textRect.width/2
     x -= center
     textRect.center = (x, y)
-    screen.blit(txt, textRect)
+    surface.blit(txt, textRect)
+
+def drawRobotImage():
     
+    pygame.draw.rect(dist_surface, blue, (dist_width/3, \
+                                                     dist_height/4, dist_width/3, \
+                                                     dist_height/2),0)
+    
+    #pygame.draw.rect(dist_surface, (150, 150, 150), (15, 20, dist_width/2, dist_height/2),0)
 
 
 # ---------------- Initialize Pygame Pieces -----------------
 if pygame_running:
-    screen = pygame.display.set_mode((1400, 900))
+    
+    screen = pygame.display.set_mode((width, height))
+    sim_surface = pygame.Surface((sim_width, sim_height))
+    dist_surface = pygame.Surface((dist_width, dist_height))
 
-    robotX = 800
-    robotY = 800
+    robotX = sim_width*6/7
+    robotY = sim_height* 8/9
+
     robot_angle = 0
     scanner_angle = 0
 
-    robot = Robot(screen, robotX, robotY, 35, 35, (255, 255, 255))
-    scanner = Robot(screen, robotX, robotY, 20, 20, (0, 0, 255))
+    robot = Robot(sim_surface, robotX, robotY, robot_height, robot_width, (255, 255, 255))
+    scanner = Robot(sim_surface, robotX, robotY, scanner_height, scanner_width, (0, 0, 255))
 
     y_change = 0
     x_change = 0
 
     barrierList = []
+    barrier_width = sim_height/100
 
     font = pygame.font.Font('freesansbold.ttf', 32)
     font_24 = pygame.font.Font('freesansbold.ttf', 24) 
@@ -180,7 +209,6 @@ while running:
             time.sleep(0.1)
         
         #print(arm_vert_axis)
-            
 
         # Decrease sensitivity
         if abs(x_axis) < 0.08:
@@ -194,13 +222,13 @@ while running:
         message += str(y_axis)
 
     controllerList.append(time.time() - controller_start)
-        
 
     server_start = time.time()
                           
     if server_online:
         
         r.receive()
+
         serverList.append(time.time() - server_start)
 
         data = r.datalist
@@ -247,40 +275,43 @@ while running:
             print('\n')
             print('temp = ', temp_data)
             print('sonar = ', sonar_data)
-
+            
     pygame_start = time.time()
     if pygame_running:
-        
-        screen.fill(black)
+
+        screen.fill(white)
+        sim_surface.fill(black)
+        dist_surface.fill(grey)
 
         # Convert angle output to radians
         angle = robot_angle / 180 * math.pi
+        
+        if controller_connected:
+            # Adjust translational movements based on direction        
+            x_change = - y_axis * math.sin(angle)
+            y_change = - y_axis * math.cos(angle)
 
-        # Adjust translational movements based on direction        
-        x_change = - y_axis * math.sin(angle)
-        y_change = - y_axis * math.cos(angle)
+            #x_change *= 3
+            #y_change *= 3
 
-        x_change *= 3
-        y_change *= 3
-
-        # Change direction that robot is looking
-        scanner_angle -= 2*scan_axis
+            # Change direction that robot is looking
+            scanner_angle -= 2*scan_axis
         
         robot.y += y_change
         robot.x += x_change
         scanner.y += y_change
         scanner.x += x_change
 
-        drawDivider(945, 0, (255, 255, 255))
+        #drawDivider()
         robot.draw(robot_angle)
         scanner.draw(scanner_angle)
 
-        barrierX = 740
-        barrierY = 700
+        barrierX = sim_width * 35/45
+        barrierY = sim_height * 2 / 3
 
         if not barrierExists(barrierList, barrierX, barrierY):
             #barrier = Barrier(screen, barrierX, barrierY, 5, 5)
-            barrier = Barrier(screen, barrierX, barrierY, 10, 40)
+            barrier = Barrier(sim_surface, barrierX, barrierY, barrier_width, sim_height * 2/45)
             #barrier = pygame.draw.rect(screen, (255, 255, 255), (780, 600, 40, 10),0)
             barrierList.append(barrier)
 
@@ -288,14 +319,16 @@ while running:
             b.draw()
             robot.displayWarnings(b)
 
+        
         # Display message when in autonomous mode
         if control_mode == "autonomous":
             mode_string = 'Mode: Autonomous'
-            displayText(mode_string, font_24, 800, 50)
+            displayText(screen, mode_string, font_24, width * 4/7, height * 1/18, white, black)
 
         if server_online:
 
             if data_status == 'GUI':
+                '''
                 ax_string = 'ax = ' + ax
                 displayText(ax_string, font, 1230, 50)
                 ay_string = 'ay = ' + ay
@@ -308,15 +341,26 @@ while running:
                 displayText(gy_string, font, 1230, 370)
                 gz_string = 'gz = ' + gz
                 displayText(gz_string, font, 1230, 450)
+                '''
                 sonar_string = 'dist = ' + sonar_data
-                displayText(sonar_string, font, 1230, 530)
+                #displayText(sonar_string, font, 1230, 530)
+
+                displayText(dist_surface, sonar_data, font_24, dist_width*3/12, dist_height/2, black, grey)
+                displayText(dist_surface, sonar_data, font_24, dist_width*11/12, dist_height/2, black, grey)
+                displayText(dist_surface, sonar_data, font_24, dist_width*6/10, dist_height/8, black, grey)
+                displayText(dist_surface, sonar_data, font_24, dist_width*6/10, dist_height*7/8, black, grey)
 
             # If robot detects an obstacle in close proximity, display message
             if float(sonar_data) < 6 or not ir_data:
                 warning_string = 'You are too close to a barrier'
-                displayText(warning_string, font, 600, 50)
-            
+                displayText(screen, warning_string, font, 600, 50, white, black)
+        
+        drawRobotImage()
+
+        screen.blit(sim_surface, (sim_x, sim_y))
+        screen.blit(dist_surface, (dist_x, dist_y))
         pygame.display.update()
+        
 
     pygameList.append(time.time() - pygame_start)
 
@@ -336,21 +380,26 @@ total = 0
 for time in elapsedList:
     total += time
 
-controller_total = 0
-for time in controllerList:
-    controller_total += time
-                
-server_total = 0
-for time in serverList:
-    server_total += time
+if controller_connected:
+    controller_total = 0
+    for time in controllerList:
+        controller_total += time
 
-pygame_total = 0
-for time in pygameList:
-    pygame_total += time
+    print('Average Elapsed Time for controller code: ', controller_total/len(controllerList))
+
+if server_online:            
+    server_total = 0
+    for time in serverList:
+        server_total += time
+
+    print('Average Elapsed Time for server code: ', server_total/len(serverList))
+
+if pygame_running:
+    pygame_total = 0
+    for time in pygameList:
+        pygame_total += time
+    print('Average Elapsed Time for pygame code: ', pygame_total/len(pygameList))
                           
 print('Average Elapsed Time: ', total/len(elapsedList))
-print('Average Elapsed Time for controller code: ', controller_total/len(controllerList))
-print('Average Elapsed Time for server code: ', server_total/len(serverList))
-print('Average Elapsed Time for pygame code: ', pygame_total/len(pygameList))
 
 pygame.quit()

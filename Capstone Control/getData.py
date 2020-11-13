@@ -14,7 +14,6 @@ class Receiver():
 
     def receive(self):
         msg = self.client.receive()
-        #msg = 'accel = 20, sonar = 30, temp = 70'
         if not msg == None:
             self.separateData(msg)
 
@@ -23,7 +22,7 @@ class Receiver():
 
     def separateData(self, msg):
         self.datalist = msg.split(',,')
-    '''
+    
     def getIMU(self, last):
         for data in self.datalist:
             if 'IMU' in data:
@@ -91,7 +90,7 @@ class Receiver():
         try: return self.datalist[2].split('=')[1].strip()
         except: return last
         
-
+    '''
     def getAllData(self):
         if len(self.datalist) > 2:
             accel = self.datalist[0].strip()
