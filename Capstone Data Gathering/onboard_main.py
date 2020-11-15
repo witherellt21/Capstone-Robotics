@@ -13,10 +13,10 @@ from IRsensor import IR
 from adafruit_motorkit import MotorKit
 
 
-sonar_activated = True
-imu_activated = True
-ir_sensor_activated = True
-motors_running = False
+sonar_activated = False
+imu_activated = False
+ir_sensor_activated = False
+motors_running = True
 server_online = True
 
 
@@ -60,6 +60,8 @@ ir_status = 1
 msg = ''
 
 control = 'stop'
+drive = 0
+turn_status = "None"
 
 running = True
 while running:
@@ -89,34 +91,42 @@ while running:
             server.receiveConnection()
 
         # Send sensor data to client
-        server.send(msg)
+        #server.send(msg)
 
         # Receive control data from client
-        #control = server.receive()
+        control = server.receive()
+
+        datalist = control.split(',')
+
+        for data in datalist:
+            if 'left' in data:
+                turn_status = 'left'
+            if 'right' in data:
+                turn_status = 'right'
+            if 'drive' in data:
+                drive = float(data.split('=')[1])
 
         #print(control)
 
         if motors_running:
-            '''
-            # Wheels are turned at the same ratio as the joystick is held
-            robot.motor1.throttle = control # Right side wheels
-            robot.motor2.throttle = control
-            robot.motor3.throttle = -control # Left side wheels are turned opposite to the right side wheels
-            robot.motor4.throttle = -control
-            '''
 
-            '''
-            if control == 'forward':
-                robot.motor1.throttle = .6
-                robot.motor2.throttle = .6
-                robot.motor3.throttle = .6
-                robot.motor4.throttle = .6
-            elif control == 'stop':
-                robot.motor1.throttle = 0
+            if turn_status == None:
+                # Wheels are turned at the same ratio as the joystick is held
+                robot.motor1.throttle = -drive # Right side wheels
+                robot.motor2.throttle = -drive
+                #robot.motor3.throttle = -control # Left side wheels are turned opposite to the right side wheels
+                #robot.motor4.throttle = -control
+
+            elif turn_status == 'left':
+                robot.motor1.throttle = 0 # Right side wheels
+                robot.motor2.throttle = -0.8
+
+            elif turn_status == 'right':
+                robot.motor1.throttle = -0.8 # Right side wheels
                 robot.motor2.throttle = 0
-                robot.motor3.throttle = 0
-                robot.motor4.throttle = 0\
-            '''
+
+        turn_status = None
+
     msg = ""
 
 print('done')
