@@ -16,9 +16,10 @@ from PIL import ImageFont
 
 # Toggle simulation elements
 server_online = True
+receiving_data = False
 pygame_running = True
 controller_connected = True
-data_status = 'GUI'
+data_status = 'None'
 
 # Color List
 white = (255, 255, 255) 
@@ -112,7 +113,7 @@ if server_online:
 temp_data = 0
 accel_data = ''
 gyro_data = ''
-sonar_data = 0
+sonar_data = ''
 ir_data = 1
 
 message = ''
@@ -173,9 +174,11 @@ while running:
         if c.joystick.get_button(6):
             robot_angle += 2
             scanner_angle += 2
+            message += "left,"
         if c.joystick.get_button(7):
             robot_angle -= 2
             scanner_angle -= 2
+            message += "right,"
 
         # Set robot to autonomous mode
         if c.joystick.get_button(8):
@@ -219,13 +222,13 @@ while running:
             scan_axis = 0
 
         # Add controller input to control message
-        message += str(y_axis)
+        message += 'drive = ' + str(y_axis) + ","
 
     controllerList.append(time.time() - controller_start)
 
     server_start = time.time()
                           
-    if server_online:
+    if server_online and receiving_data:
         
         r.receive()
 
@@ -325,7 +328,7 @@ while running:
             mode_string = 'Mode: Autonomous'
             displayText(screen, mode_string, font_24, width * 4/7, height * 1/18, white, black)
 
-        if server_online:
+        if server_online and receiving_data:
 
             if data_status == 'GUI':
                 '''
@@ -360,13 +363,13 @@ while running:
         screen.blit(sim_surface, (sim_x, sim_y))
         screen.blit(dist_surface, (dist_x, dist_y))
         pygame.display.update()
-        
-
+         
     pygameList.append(time.time() - pygame_start)
 
     if server_online:
         r.client.send(message)
-        message = ''
+
+    message = ''
 
     elapsed = time.time() - start
     elapsedList.append(elapsed)
