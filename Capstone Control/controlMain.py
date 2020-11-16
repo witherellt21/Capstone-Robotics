@@ -16,10 +16,10 @@ from PIL import ImageFont
 
 # Toggle simulation elements
 server_online = True
-receiving_data = False
+receiving_data = True
 pygame_running = True
 controller_connected = True
-data_status = 'None'
+data_status = 'GUI'
 
 # Color List
 white = (255, 255, 255) 
@@ -29,11 +29,13 @@ black = (0, 0, 0)
 grey = (200, 200, 200)
 
 # GUI Attributes
-height = 800
-width = 1400
+height = 700
+width = 1300
 
 sim_height = height/2
 sim_width = height/2
+#sim_height = height
+#sim_width = width
 sim_x = 0
 sim_y = 0
 robot_height = robot_width = sim_height * 4/90
@@ -104,7 +106,7 @@ if pygame_running:
 if server_online:
     # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
-    PORT = 10001
+    PORT = 10000
     r = Receiver(IP, PORT)
     r.client.connect()
 
@@ -229,9 +231,9 @@ while running:
     server_start = time.time()
                           
     if server_online and receiving_data:
-        
-        r.receive()
 
+        r.receive()
+        
         serverList.append(time.time() - server_start)
 
         data = r.datalist
@@ -333,20 +335,20 @@ while running:
             if data_status == 'GUI':
                 '''
                 ax_string = 'ax = ' + ax
-                displayText(ax_string, font, 1230, 50)
+                displayText(sim_surface, ax_string, font, 300, 50, white, black)
                 ay_string = 'ay = ' + ay
-                displayText(ay_string, font, 1230, 130)
+                displayText(sim_surface, ay_string, font, 300, 130, white, black)
                 az_string = 'az = ' + az
-                displayText(az_string, font, 1230, 210)
+                displayText(sim_surface, az_string, font, 300, 210, white, black)
                 gx_string = 'gx = ' + gx
-                displayText(gx_string, font, 1230, 290)
+                displayText(sim_surface, gx_string, font, 300, 290, white, black)
                 gy_string = 'gy = ' + gy
-                displayText(gy_string, font, 1230, 370)
+                displayText(sim_surface, gy_string, font, 300, 370, white, black)
                 gz_string = 'gz = ' + gz
-                displayText(gz_string, font, 1230, 450)
+                displayText(sim_surface, gz_string, font, 300, 450, white, black)
                 '''
                 sonar_string = 'dist = ' + sonar_data
-                #displayText(sonar_string, font, 1230, 530)
+                #displayText(sim_surface, sonar_string, font, 300, 530, white, black)
 
                 displayText(dist_surface, sonar_data, font_24, dist_width*3/12, dist_height/2, black, grey)
                 displayText(dist_surface, sonar_data, font_24, dist_width*11/12, dist_height/2, black, grey)
@@ -360,8 +362,8 @@ while running:
         
         drawRobotImage()
 
-        screen.blit(sim_surface, (sim_x, sim_y))
         screen.blit(dist_surface, (dist_x, dist_y))
+        screen.blit(sim_surface, (sim_x, sim_y))
         pygame.display.update()
          
     pygameList.append(time.time() - pygame_start)
@@ -375,7 +377,7 @@ while running:
     elapsedList.append(elapsed)
 
     if time.time() - launch >= 60:
-        running = False
+        pass
         
     time.sleep(0.001)
 
