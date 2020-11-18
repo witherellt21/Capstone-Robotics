@@ -18,6 +18,7 @@ imu_activated = True
 ir_sensor_activated = True
 motors_running = False
 server_online = True
+trigger_turn = True
 
 
 # ---------------- Initialize Server -----------------
@@ -63,6 +64,9 @@ control = 'stop'
 drive = 0
 turn_status = "None"
 
+m1_throttle = 0
+m2_throttle = 0
+
 running = True
 while running:
 
@@ -98,34 +102,44 @@ while running:
 
         datalist = control.split(',')
 
-        for data in datalist:
-            if 'left' in data:
-                turn_status = 'left'
-            if 'right' in data:
-                turn_status = 'right'
-            if 'drive' in data:
-                drive = float(data.split('=')[1])
+        # Wheels are turned at the same ratio as the joystick is held
+        # M1 is right side wheel
+        # M2 is left side
+        if trigger_turn:
+            for data in datalist:
+                if 'left' in data:
+                    m1_throttle = None
+                    m2_throttle = -0.8
+                elif 'right' in data:
+                    m1_throttle = -0.8
+                    m2_throttle = None
+                elif 'drive' in data:
+                    drive = float(data.split('=')[1])
+                    m1_throttle = -drive
+                    m2_throttle = -drive
+        else:
+            for data in datalist:
+                if 'horiz' in data:
+                    turn_factor = int(data.split('=')[1])
+                if 'vert' in data:
+                    drive = int(data.split('=')[1])
 
-        #print(control)
+            if turn_factor < 0:
+                m1_throttle = -drive - turn_factor
+                m2_throttle = -drive
+            elif turn_factor > 0:
+                m1_throttle = -drive
+                m2_throttle = -drive + turn_factor
+            else:
+                m1_throttle = -drive
+                m2_throttle = -drive
+
+        print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
 
         if motors_running:
 
-            if turn_status == None:
-                # Wheels are turned at the same ratio as the joystick is held
-                robot.motor1.throttle = -drive # Right side wheels
-                robot.motor2.throttle = -drive
-                #robot.motor3.throttle = -control # Left side wheels are turned opposite to the right side wheels
-                #robot.motor4.throttle = -control
-
-            elif turn_status == 'left':
-                robot.motor1.throttle = None # Right side wheels
-                robot.motor2.throttle = -0.8
-
-            elif turn_status == 'right':
-                robot.motor1.throttle = -0.8 # Right side wheels
-                robot.motor2.throttle = 0
-
-        turn_status = None
+            robot.motor1.throttle = m1_throttle
+            robot.motor2.throttle = m2_throttle
 
     msg = ""
 

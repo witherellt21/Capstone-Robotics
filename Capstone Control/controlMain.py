@@ -19,6 +19,7 @@ server_online = False
 receiving_data = False
 pygame_running = True
 controller_connected = True
+trigger_turn = False
 data_status = 'GUI'
 
 # Color List
@@ -127,6 +128,7 @@ if controller_connected:
 
 # Set control mode to either "user-controlled" or "automated
 control_mode = "user-controlled"
+turn_factor = ''
 
 
 # ------------------- Configure Robot --------------------
@@ -172,15 +174,16 @@ while running:
         scan_axis, x_axis, y_axis = c.get_axes()
         y_axis = - y_axis
 
-        # Get trigger data to control turning
-        if c.joystick.get_button(6):
-            #robot_angle += 2
-            #scanner_angle += 2
-            message += "left,"
-        if c.joystick.get_button(7):
-            #robot_angle -= 2
-            #scanner_angle -= 2
-            message += "right,"
+        if trigger_turn:
+            # Get trigger data to control turning
+            if c.joystick.get_button(6):
+                robot_angle += 2
+                scanner_angle += 2
+                message += "left,"
+            if c.joystick.get_button(7):
+                robot_angle -= 2
+                scanner_angle -= 2
+                message += "right,"
 
         # Set robot to autonomous mode
         if c.joystick.get_button(8):
@@ -216,15 +219,23 @@ while running:
         #print(arm_vert_axis)
 
         # Decrease sensitivity
-        if abs(x_axis) < 0.11:
+        if abs(x_axis) < 0.004:
             x_axis = 0
-        if abs(y_axis) < 0.11:
+        if abs(y_axis) < 0.004:
             y_axis = 0
-        if abs(scan_axis) < 0.11:
+        if abs(scan_axis) < 0.004:
             scan_axis = 0
 
+        turn_factor = 0
+        if x_axis:
+            turn_factor = round(x_axis / (abs(x_axis) + abs(y_axis)), 3)
+        y_axis = round(y_axis, 3)
+
         # Add controller input to control message
-        message += 'drive = ' + str(y_axis) + ","
+        if trigger_turn:
+            message += 'vert = ' + str(y_axis) + ","
+        else:
+            message += 'vert = ' + str(y_axis) + ", horiz = " + str(turn_factor)
 
     controllerList.append(time.time() - controller_start)
 
@@ -295,10 +306,7 @@ while running:
         if controller_connected:
             # Adjust translational movements based on direction        
             x_change = - y_axis * math.sin(angle)
-            y_change = - y_axis * math.cos(angle) 
-
-            #x_change *= 3
-            #y_change *= 3
+            y_change = - y_axis * math.cos(angle)
 
             # Change direction that robot is looking
             scanner_angle -= x_axis - 2*scan_axis
@@ -373,6 +381,8 @@ while running:
 
     if server_online:
         r.client.send(message)
+
+    print(message)
 
     message = ''
 
