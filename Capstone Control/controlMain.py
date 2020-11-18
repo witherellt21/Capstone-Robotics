@@ -15,7 +15,8 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = True
+server_online = False
+receiving_data = False
 pygame_running = True
 controller_connected = True
 data_status = 'GUI'
@@ -28,11 +29,13 @@ black = (0, 0, 0)
 grey = (200, 200, 200)
 
 # GUI Attributes
-height = 800
-width = 1400
+height = 700
+width = 1300
 
-sim_height = height/2
-sim_width = height/2
+#sim_height = height/2
+#sim_width = height/2
+sim_height = height
+sim_width = width
 sim_x = 0
 sim_y = 0
 robot_height = robot_width = sim_height * 4/90
@@ -103,7 +106,7 @@ if pygame_running:
 if server_online:
     # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
-    PORT = 10001
+    PORT = 10000
     r = Receiver(IP, PORT)
     r.client.connect()
 
@@ -112,7 +115,7 @@ if server_online:
 temp_data = 0
 accel_data = ''
 gyro_data = ''
-sonar_data = 0
+sonar_data = ''
 ir_data = 1
 
 message = ''
@@ -171,11 +174,13 @@ while running:
 
         # Get trigger data to control turning
         if c.joystick.get_button(6):
-            robot_angle += 2
-            scanner_angle += 2
+            #robot_angle += 2
+            #scanner_angle += 2
+            message += "left,"
         if c.joystick.get_button(7):
-            robot_angle -= 2
-            scanner_angle -= 2
+            #robot_angle -= 2
+            #scanner_angle -= 2
+            message += "right,"
 
         # Set robot to autonomous mode
         if c.joystick.get_button(8):
@@ -211,24 +216,24 @@ while running:
         #print(arm_vert_axis)
 
         # Decrease sensitivity
-        if abs(x_axis) < 0.08:
+        if abs(x_axis) < 0.11:
             x_axis = 0
-        if abs(y_axis) < 0.08:
+        if abs(y_axis) < 0.11:
             y_axis = 0
-        if abs(scan_axis) < 0.08:
+        if abs(scan_axis) < 0.11:
             scan_axis = 0
 
         # Add controller input to control message
-        message += str(y_axis)
+        message += 'drive = ' + str(y_axis) + ","
 
     controllerList.append(time.time() - controller_start)
 
     server_start = time.time()
                           
-    if server_online:
-        
-        r.receive()
+    if server_online and receiving_data:
 
+        r.receive()
+        
         serverList.append(time.time() - server_start)
 
         data = r.datalist
@@ -283,19 +288,22 @@ while running:
         sim_surface.fill(black)
         dist_surface.fill(grey)
 
+
         # Convert angle output to radians
         angle = robot_angle / 180 * math.pi
         
         if controller_connected:
             # Adjust translational movements based on direction        
             x_change = - y_axis * math.sin(angle)
-            y_change = - y_axis * math.cos(angle)
+            y_change = - y_axis * math.cos(angle) 
 
             #x_change *= 3
             #y_change *= 3
 
             # Change direction that robot is looking
-            scanner_angle -= 2*scan_axis
+            scanner_angle -= x_axis - 2*scan_axis
+            robot_angle -= x_axis
+            
         
         robot.y += y_change
         robot.x += x_change
@@ -323,27 +331,27 @@ while running:
         # Display message when in autonomous mode
         if control_mode == "autonomous":
             mode_string = 'Mode: Autonomous'
-            displayText(screen, mode_string, font_24, width * 4/7, height * 1/18, white, black)
+            displayText(sim_surface, mode_string, font_24, width * 4/7, height * 3/18, white, black)
 
-        if server_online:
+        if server_online and receiving_data:
 
             if data_status == 'GUI':
-                '''
+                
                 ax_string = 'ax = ' + ax
-                displayText(ax_string, font, 1230, 50)
+                displayText(sim_surface, ax_string, font, 300, 50, white, black)
                 ay_string = 'ay = ' + ay
-                displayText(ay_string, font, 1230, 130)
+                displayText(sim_surface, ay_string, font, 300, 130, white, black)
                 az_string = 'az = ' + az
-                displayText(az_string, font, 1230, 210)
+                displayText(sim_surface, az_string, font, 300, 210, white, black)
                 gx_string = 'gx = ' + gx
-                displayText(gx_string, font, 1230, 290)
+                displayText(sim_surface, gx_string, font, 300, 290, white, black)
                 gy_string = 'gy = ' + gy
-                displayText(gy_string, font, 1230, 370)
+                displayText(sim_surface, gy_string, font, 300, 370, white, black)
                 gz_string = 'gz = ' + gz
-                displayText(gz_string, font, 1230, 450)
-                '''
+                displayText(sim_surface, gz_string, font, 300, 450, white, black)
+                
                 sonar_string = 'dist = ' + sonar_data
-                #displayText(sonar_string, font, 1230, 530)
+                displayText(sim_surface, sonar_string, font, 300, 530, white, black)
 
                 displayText(dist_surface, sonar_data, font_24, dist_width*3/12, dist_height/2, black, grey)
                 displayText(dist_surface, sonar_data, font_24, dist_width*11/12, dist_height/2, black, grey)
@@ -353,26 +361,26 @@ while running:
             # If robot detects an obstacle in close proximity, display message
             if float(sonar_data) < 6 or not ir_data:
                 warning_string = 'You are too close to a barrier'
-                displayText(screen, warning_string, font, 600, 50, white, black)
+                displayText(sim_surface, warning_string, font, 900, 50, white, black)
         
         drawRobotImage()
 
-        screen.blit(sim_surface, (sim_x, sim_y))
         screen.blit(dist_surface, (dist_x, dist_y))
+        screen.blit(sim_surface, (sim_x, sim_y))
         pygame.display.update()
-        
-
+         
     pygameList.append(time.time() - pygame_start)
 
     if server_online:
         r.client.send(message)
-        message = ''
+
+    message = ''
 
     elapsed = time.time() - start
     elapsedList.append(elapsed)
 
     if time.time() - launch >= 60:
-        running = False
+        pass
         
     time.sleep(0.001)
 
