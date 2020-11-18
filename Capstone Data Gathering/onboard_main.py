@@ -13,10 +13,10 @@ from IRsensor import IR
 from adafruit_motorkit import MotorKit
 
 
-sonar_activated = False
-imu_activated = False
-ir_sensor_activated = False
-motors_running = True
+sonar_activated = True
+imu_activated = True
+ir_sensor_activated = True
+motors_running = False
 server_online = True
 
 
@@ -24,7 +24,7 @@ server_online = True
 if server_online:
     # Set the client to the server's IP and PORT address
     IP = '192.168.2.2'
-    PORT = 10001
+    PORT = 10000
     server = Server(IP, PORT)
 
     server.start()
@@ -91,7 +91,7 @@ while running:
             server.receiveConnection()
 
         # Send sensor data to client
-        #server.send(msg)
+        server.send(msg)
 
         # Receive control data from client
         control = server.receive()
@@ -118,7 +118,7 @@ while running:
                 #robot.motor4.throttle = -control
 
             elif turn_status == 'left':
-                robot.motor1.throttle = 0 # Right side wheels
+                robot.motor1.throttle = None # Right side wheels
                 robot.motor2.throttle = -0.8
 
             elif turn_status == 'right':
