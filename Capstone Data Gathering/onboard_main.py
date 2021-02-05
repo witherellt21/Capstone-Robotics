@@ -17,8 +17,8 @@ sonar_activated = True
 imu_activated = True
 ir_sensor_activated = True
 motors_running = False
-server_online = True
-trigger_turn = True
+server_online = False
+trigger_turn = False
 
 
 # ---------------- Initialize Server -----------------
@@ -89,6 +89,8 @@ while running:
     msg = "sonar = " + str(dist) + ",, temp = " + str(temp) + ",, accel = " + str(acc) + \
             ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status)
 
+    print(msg)
+
     if server_online:
         # If client disconnects from server, reconnect
         if server.disconnect_counter > 0:
@@ -120,9 +122,9 @@ while running:
         else:
             for data in datalist:
                 if 'horiz' in data:
-                    turn_factor = int(data.split('=')[1])
+                    turn_factor = float(data.split('=')[1])
                 if 'vert' in data:
-                    drive = int(data.split('=')[1])
+                    drive = float(data.split('=')[1])
 
             if turn_factor < 0:
                 m1_throttle = -drive - turn_factor
@@ -135,6 +137,7 @@ while running:
                 m2_throttle = -drive
 
         print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
+        print('')
 
         if motors_running:
 
