@@ -18,7 +18,7 @@ from PIL import ImageFont
 server_online = False
 receiving_data = False
 pygame_running = True
-controller_connected = True
+controller_connected = False
 trigger_turn = False
 data_status = 'GUI'
 
@@ -33,10 +33,10 @@ grey = (200, 200, 200)
 height = 700
 width = 1300
 
-#sim_height = height/2
-#sim_width = height/2
-sim_height = height
-sim_width = width
+sim_height = height/2
+sim_width = height/2
+#sim_height = height
+#sim_width = width
 sim_x = 0
 sim_y = 0
 robot_height = robot_width = sim_height * 4/90
@@ -235,7 +235,7 @@ while running:
         if trigger_turn:
             message += 'vert = ' + str(y_axis) + ","
         else:
-            message += 'vert = ' + str(y_axis) + ", horiz = " + str(turn_factor)
+            message += 'vert = ' + str(y_axis) + ", horiz = " + str(turn_factor) + ","
 
     controllerList.append(time.time() - controller_start)
 
@@ -381,8 +381,6 @@ while running:
 
     if server_online:
         r.client.send(message)
-
-    print(message)
 
     message = ''
 

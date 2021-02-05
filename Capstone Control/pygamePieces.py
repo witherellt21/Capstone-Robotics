@@ -10,60 +10,97 @@ class Robot():
         self.width = width
         self.color = color
         self.screen = screen
-        self.direction = 'up'
         self.center = (self.x, self.y)
         self.surface = pygame.Surface((self.width, self.height))
+        self.angle = 0
+        self._direction = 'up'
 
-    def draw(self, degrees):
+        #For automation:
+        self.firstMove = 'left'
+        self.secondMove = 'up'
+        self.thirdMove = 'right'
+        self.fourthMove = 'down'
 
-        angle = math.pi*degrees/180
+    def draw(self):
 
-        #if self.direction == 'up':
+        angle = math.pi*self.angle/180
+        
         point_of_triangle = (self.x + self.height/2 * math.cos(math.pi*90/180 + angle), (self.y - self.height/2 * math.sin(math.pi*90/180 + angle)))
         bottom_left = (self.x + self.height/2 * math.cos(math.pi*225/180 + angle), self.y - self.height/2 * math.sin(math.pi*225/180 + angle))
         bottom_right = (self.x + self.height/2 * math.cos(math.pi*315/180 + angle), self.y - self.height/2 * math.sin(math.pi*315/180 + angle))
         coordinates = [bottom_left, point_of_triangle, bottom_right]
-        '''
-        elif self.direction == 'left':
-            point_of_triangle = (self.x - self.width/2, self.y)
-            coordinates = [(self.x + self.height/2, self.y - self.width/2), point_of_triangle, (self.x + self.height/2, self.y + self.width/2)]
-        elif self.direction == 'right':
-            point_of_triangle = (self.x + self.width/2, self.y)
-            coordinates = [(self.x - self.height/2, self.y - self.width/2), point_of_triangle, (self.x - self.height/2, self.y + self.width/2)]
-        elif self.direction == 'down':
-            point_of_triangle = (self.x, (self.y + self.height/2))
-            coordinates = [(self.x - self.width/2, self.y - self.height/2), point_of_triangle, (self.x + self.width/2, self.y - self.height/2)]
-        '''
-        #pygame.draw.rect(self.screen, (255, 255, 255), (self.x, self.y, self.width, self.height),0)
+    
         pygame.draw.polygon(self.screen, self.color, coordinates)
 
+    #Gets distance of adjacent barrier from direction
     def getDistance(self, barrier, direction):
-        if direction == 'up' or direction == 'down':
-            distance = self.y - barrier.y + barrier.height/2
-        elif direction == 'left' or direction == 'right':
-            distance = self.x - barrier.x + barrier.width/2
-        #distance = math.sqrt(math.pow(self.x - barrier.x + barrier.width/2, 2) + math.pow(self.y - barrier.y + barrier.height/2, 2))
+        if direction == 'up':
+            distance = self.y - barrier.y - barrier.height
+        if direction == 'down':
+            distance = barrier.y - self.y
+        elif direction == 'left':
+            distance = self.x - barrier.x - barrier.width
+        elif direction == 'right':
+            distance = barrier.x - self.x
         return distance
 
+    # Gets direction of adjacent barrier
     def getDirection(self, barrier):
-        #if (self.x + self.width/2 >= barrier.x and self.x + self.width/2 <= barrier.x + barrier.width) or (barrier.x < self.x + self.width/2 and barrier.x + self.width >= self.x - self.width/2):
         if (barrier.x <= self.x + self.width/2 and barrier.x >= self.x - self.width/2) or (barrier.x + barrier.width <= self.x + self.width/2 and barrier.x + barrier.width >= self.x - self.width/2):
             if self.y > barrier.y:
                 return 'up'
-                #self.displayWarningUp(distance)
             else:
                 return 'down'
-                #self.displayWarningDown()
-
+        elif (barrier.y <= self.y + self.height/2 and barrier.y >= self.y - self.height/2) or (barrier.y + barrier.height <= self.y + self.height/2 and barrier.y + barrier.height >= self.y - self.height/2):
+            if self.x > barrier.x:
+                return 'left'
+            else:
+                return 'right'
+        elif self.x >= barrier.x and self.x <= barrier.x + barrier.width:
+            if self.y > barrier.y:
+                return 'up'
+            else:
+                return 'down'
         elif self.y >= barrier.y and self.y <= barrier.y + barrier.height:
             if self.x > barrier.x:
-
                 return 'left'
-                #self.displayWarningLeft()
             else:
-
                 return 'right'
-                #self.displayWarningRight()
+
+    def turnLeft(self):
+        self.angle = 90
+        self._direction = 'left'
+
+    def turnUp(self):
+        self.angle = 0
+        self._direction = 'up'
+
+    def turnDown(self):
+        self.angle = 180
+        self._direction = 'down'
+
+    def turnRight(self):
+        self.angle = 270
+        self._direction = 'right'
+
+    def executeMove(self, move):
+        if move == 'left':
+            self.turnLeft()
+        elif move == 'right':
+            self.turnRight()
+        elif move == 'up':
+            self.turnUp()
+        elif move == 'down':
+            self.turnDown()
+
+    #Used for Left hand on the wall with help method
+    def getPreferredMoves(self, method, moves ):
+
+        if method == 'lefthandwithhelp':
+            if moves[1] == 'up':
+                
+            
+            
 
     def displayWarnings(self, barrier):
         direction = self.getDirection(barrier)
