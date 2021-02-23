@@ -21,9 +21,11 @@ class Robot():
         self.thirdMove = 'right'
         self.fourthMove = 'down'
 
-    def draw(self):
+    def draw(self, _angle):
 
-        angle = math.pi*self.angle/180
+        angle = math.pi*_angle/180
+
+        angle = math.pi*_angle/180
         
         point_of_triangle = (self.x + self.height/2 * math.cos(math.pi*90/180 + angle), (self.y - self.height/2 * math.sin(math.pi*90/180 + angle)))
         bottom_left = (self.x + self.height/2 * math.cos(math.pi*225/180 + angle), self.y - self.height/2 * math.sin(math.pi*225/180 + angle))
@@ -98,6 +100,7 @@ class Robot():
 
         if method == 'lefthandwithhelp':
             if moves[1] == 'up':
+                pass
                 
             
             

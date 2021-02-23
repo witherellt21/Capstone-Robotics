@@ -12,12 +12,12 @@ class Receiver():
     def __init__(self, IP, PORT):
         self.client = Client(IP, PORT)
 
-    def receive(self):
+    def receive_msg(self):
         msg = self.client.receive()
         if not msg == None:
             self.separateData(msg)
 
-    def send(self, string):
+    def send_msg(self, string):
         self.client.send(string)
 
     def separateData(self, msg):
@@ -41,7 +41,11 @@ class Receiver():
     def getSonar(self, last):
         for data in self.datalist:
             if 'sonar' in data:
-                try: return float(data.split('=')[1].strip())
+                #sonar_total = data.split('=')[1]
+                #sonar_split = sonar_total.strip('[').strip(']')
+                #print(sonar_split)
+                #print(data.split('=')[1])
+                try: return data.split('=')[1].strip()
                 except: return last
         return last
 
