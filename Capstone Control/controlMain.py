@@ -16,7 +16,7 @@ from PIL import ImageFont
 
 # Toggle simulation elements
 server_online = True
-receiving_data = False
+receiving_data = True
 pygame_running = True
 controller_connected = True
 trigger_turn = False
@@ -94,7 +94,7 @@ if pygame_running:
     robot = Robot(sim_surface, robotX, robotY, robot_height, robot_width, (255, 255, 255))
     scanner = Robot(sim_surface, robotX, robotY, scanner_height, scanner_width, (0, 0, 255))
 
-    y_change = 0
+    y_change = 0d\
     x_change = 0
 
     barrierList = []
@@ -108,7 +108,7 @@ if pygame_running:
 if server_online:
     # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
-    PORT = 10001
+    PORT = 10000
     r = Receiver(IP, PORT)
     r.client.connect()
 
@@ -298,6 +298,8 @@ while running:
     if server_online and receiving_data:
 
         r.receive_msg()
+        #print('receieved', time.time())
+        time.sleep(0.03)
 
         serverList.append(time.time() - server_start)
 
@@ -450,7 +452,7 @@ while running:
     if server_online:
         r.send_msg(message)
     
-    print(message)
+    #print(message)
     message = ','
 
     elapsed = time.time() - start
