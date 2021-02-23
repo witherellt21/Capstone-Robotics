@@ -29,7 +29,7 @@ class Server():
     def receive(self):
         data = self.conn.recv(1024)
         msg = data.decode("utf-8")
-        if len(msg) > 0:
+        if msg:
             return msg
         else:
             self.disconnect_counter += 1
