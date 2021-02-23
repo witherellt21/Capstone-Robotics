@@ -15,11 +15,12 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = False
+server_online = True
 receiving_data = False
 pygame_running = True
-controller_connected = False
+controller_connected = True
 trigger_turn = False
+keyboard_control = False
 data_status = 'GUI'
 
 # Color List
@@ -107,19 +108,31 @@ if pygame_running:
 if server_online:
     # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
-    PORT = 10000
+    PORT = 10001
     r = Receiver(IP, PORT)
     r.client.connect()
 
 
 # ---------------- Initialize Variables -----------------
 temp_data = 0
-accel_data = ''
-gyro_data = ''
-sonar_data = ''
+accel_data = '0'
+gyro_data = '0'
+sonar_data = '0'
+front_dist = '0'
+back_dist = '0'
+left_dist = '0'
+right_dist = '0'
 ir_data = 1
 
-message = ''
+ax = ''
+ay = ''
+az = ''
+gx = ''
+gy = ''
+gz = ''
+temp = ''
+
+message = ','
 
 
 # ---------------- Initialize Controller -----------------
@@ -129,6 +142,10 @@ if controller_connected:
 # Set control mode to either "user-controlled" or "automated
 control_mode = "user-controlled"
 turn_factor = ''
+drive_control = 'none'
+
+mag = ''
+total_mag = math.sqrt(1 ** 2 + 1 ** 2)
 
 
 # ------------------- Configure Robot --------------------
@@ -163,6 +180,30 @@ while running:
             arm_vert_axis = event.value[1]
             arm_horiz_axis = event.value[0]
 
+        if keyboard_control:
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    drive_control = 'left'
+                elif event.key == pygame.K_UP:
+                    drive_control = 'forward'
+                elif event.key == pygame.K_DOWN:
+                    drive_control = 'backward'
+                elif event.key == pygame.K_RIGHT:
+                    drive_control = 'right'
+                    
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    drive_control = 'none'
+                elif event.key == pygame.K_UP:
+                    drive_control = 'none'
+                elif event.key == pygame.K_DOWN:
+                    drive_control = 'none'
+                elif event.key == pygame.K_RIGHT:
+                    drive_control = 'none'
+                    
+    message += drive_control
+    
     controller_start = time.time()
     if controller_connected:
         
@@ -192,7 +233,7 @@ while running:
                 control_mode = "autonomous"
             else:
                 control_mode = "user-controlled"
-
+                
         # Control arm movements using D-pad
         if arm_vert_axis:
             if arm_vert_axis > 0:
@@ -225,35 +266,54 @@ while running:
             y_axis = 0
         if abs(scan_axis) < 0.004:
             scan_axis = 0
-
+        #time.sleep(1)
         turn_factor = 0
-        if x_axis:
-            turn_factor = round(x_axis / (abs(x_axis) + abs(y_axis)), 3)
-        y_axis = round(y_axis, 3)
 
+        if abs(x_axis) + abs(y_axis) > 1:
+            x_hold = x_axis
+            x_axis = x_axis / (abs(x_axis) + abs(y_axis))
+            y_axis = y_axis / (abs(x_hold) + abs(y_axis))
+
+        
+        mag = round(abs(x_axis) + abs(y_axis), 2)
+        if y_axis < 0:
+            mag = -mag
+
+        if x_axis:
+            turn_factor = round(x_axis, 3)
+            #mag = round(math.sqrt(x_axis ** 2 + y_axis ** 2)/total_mag, 2)
+        #y_axis = round(y_axis, 3)
+        #print(x_axis, y_axis)
         # Add controller input to control message
+        
         if trigger_turn:
             message += 'vert = ' + str(y_axis) + ","
         else:
-            message += 'vert = ' + str(y_axis) + ", horiz = " + str(turn_factor) + ","
-
+            message += 'mag = ' + str(mag) + ", turn = " + str(turn_factor) + ","
+        
     controllerList.append(time.time() - controller_start)
 
     server_start = time.time()
-                          
+
     if server_online and receiving_data:
 
-        r.receive()
-        
+        r.receive_msg()
+
         serverList.append(time.time() - server_start)
 
         data = r.datalist
-        
         #GET TEMPERATURE DATA
         #temp_data = r.getTemp(temp_data)
 
         #GET SONAR DATA
-        sonar_data = str(r.getSonar(sonar_data))
+        sonar_data = r.getSonar(sonar_data)
+        sonar_total = sonar_data.split(',')
+
+        if len(sonar_total) == 4:
+            front_dist = sonar_total[0].strip('[')
+            right_dist = sonar_total[1]
+            back_dist = sonar_total[2]
+            left_dist = sonar_total[3].strip(']')
 
         #GET IR PROXIMITY DATA
         ir_data = r.getIR(ir_data)
@@ -261,20 +321,22 @@ while running:
         #GET ACCELEROMETER DATA
         accel_data = r.getAccel(accel_data)
         a_datalist = accel_data.split(',')
-        ax = a_datalist[0].strip('[')
-        ay = a_datalist[1]
-        az = a_datalist[2].strip(']')
+        if len(a_datalist) >= 3:
+            ax = a_datalist[0].strip('[')
+            ay = a_datalist[1]
+            az = a_datalist[2].strip(']')
 
         #GET GYROSCOPE DATA
         gyro_data = r.getGyro(gyro_data)
         g_datalist = gyro_data.split(',')
-        gx = g_datalist[0].strip('[')
-        gy = g_datalist[1]
-        gz = g_datalist[2].strip(']')
+        if len(g_datalist) >= 3:
+            gx = g_datalist[0].strip('[')
+            gy = g_datalist[1]
+            gz = g_datalist[2].strip(']')
         
-        if 'sonar' in g_datalist[2]:
-            gz = g_datalist[2].strip(']sonar')
-        else: gz = g_datalist[2].strip(']')
+            if 'sonar' in g_datalist[2]:
+                gz = g_datalist[2].strip(']sonar')
+            else: gz = g_datalist[2].strip(']')
         
 
         if data_status == 'printing':
@@ -290,8 +352,11 @@ while running:
             
             print('\n')
             print('temp = ', temp_data)
-            print('sonar = ', sonar_data)
-            
+            print('front = ', front_dist)
+            print('right = ', right_dist)
+            print('back = ', back_dist)
+            print('left = ', left_dist)
+
     pygame_start = time.time()
     if pygame_running:
 
@@ -344,7 +409,7 @@ while running:
         if server_online and receiving_data:
 
             if data_status == 'GUI':
-                
+                '''
                 ax_string = 'ax = ' + ax
                 displayText(sim_surface, ax_string, font, 300, 50, white, black)
                 ay_string = 'ay = ' + ay
@@ -357,17 +422,20 @@ while running:
                 displayText(sim_surface, gy_string, font, 300, 370, white, black)
                 gz_string = 'gz = ' + gz
                 displayText(sim_surface, gz_string, font, 300, 450, white, black)
+                '''
                 
-                sonar_string = 'dist = ' + sonar_data
-                displayText(sim_surface, sonar_string, font, 300, 530, white, black)
+                front_string = 'dist = ' + front_dist
+                displayText(sim_surface, front_string, font, 300, 530, white, black)
 
-                displayText(dist_surface, sonar_data, font_24, dist_width*3/12, dist_height/2, black, grey)
-                displayText(dist_surface, sonar_data, font_24, dist_width*11/12, dist_height/2, black, grey)
-                displayText(dist_surface, sonar_data, font_24, dist_width*6/10, dist_height/8, black, grey)
-                displayText(dist_surface, sonar_data, font_24, dist_width*6/10, dist_height*7/8, black, grey)
+
+                displayText(dist_surface, str(left_dist), font_24, dist_width*3/12, dist_height/2, black, grey)
+                displayText(dist_surface, str(right_dist), font_24, dist_width*11/12, dist_height/2, black, grey)
+                displayText(dist_surface, str(front_dist), font_24, dist_width*6/10, dist_height/8, black, grey)
+                displayText(dist_surface, str(back_dist), font_24, dist_width*6/10, dist_height*7/8, black, grey)
 
             # If robot detects an obstacle in close proximity, display message
-            if float(sonar_data) < 6 or not ir_data:
+            #print(front_dist)
+            if float(front_dist) < 6 or not ir_data:
                 warning_string = 'You are too close to a barrier'
                 displayText(sim_surface, warning_string, font, 900, 50, white, black)
         
@@ -380,9 +448,10 @@ while running:
     pygameList.append(time.time() - pygame_start)
 
     if server_online:
-        r.client.send(message)
-
-    message = ''
+        r.send_msg(message)
+    
+    print(message)
+    message = ','
 
     elapsed = time.time() - start
     elapsedList.append(elapsed)
