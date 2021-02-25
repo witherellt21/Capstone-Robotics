@@ -19,7 +19,7 @@ server_online = True
 receiving_data = True
 pygame_running = True
 controller_connected = True
-trigger_turn = False
+trigger_turn = True
 keyboard_control = False
 data_status = 'GUI'
 
@@ -94,7 +94,7 @@ if pygame_running:
     robot = Robot(sim_surface, robotX, robotY, robot_height, robot_width, (255, 255, 255))
     scanner = Robot(sim_surface, robotX, robotY, scanner_height, scanner_width, (0, 0, 255))
 
-    y_change = 0d\
+    y_change = 0
     x_change = 0
 
     barrierList = []
@@ -220,11 +220,11 @@ while running:
             if c.joystick.get_button(6):
                 robot_angle += 2
                 scanner_angle += 2
-                message += "left,"
+                message += ",triggerleft,"
             if c.joystick.get_button(7):
                 robot_angle -= 2
                 scanner_angle -= 2
-                message += "right,"
+                message += ",triggerright,"
 
         # Set robot to autonomous mode
         if c.joystick.get_button(8):
@@ -286,10 +286,9 @@ while running:
         #print(x_axis, y_axis)
         # Add controller input to control message
         
-        if trigger_turn:
-            message += 'vert = ' + str(y_axis) + ","
-        else:
-            message += 'mag = ' + str(mag) + ", turn = " + str(turn_factor) + ","
+        
+        message += 'mag = ' + str(mag) + ", turn = " + str(turn_factor) + ","
+        print(message)
         
     controllerList.append(time.time() - controller_start)
 
