@@ -15,7 +15,7 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = False
+server_online = True
 receiving_data = False
 pygame_running = True
 controller_connected = True
@@ -207,8 +207,6 @@ while running:
     
     controller_start = time.time()
     if controller_connected:
-
-        print(c.joystick.get_button(3))
         
         # Use start button to quit simulation
         if c.joystick.get_button(9):
@@ -236,7 +234,7 @@ while running:
                 control_mode = "autonomous"
             else:
                 control_mode = "user-controlled"
-                
+        '''
         # Control arm movements using D-pad
         if arm_vert_axis:
             if arm_vert_axis > 0:
@@ -248,20 +246,22 @@ while running:
                 print('move arm right')
             else:
                 print('move arm left')
-
-        #Control arm using A and B button
         '''
-        if c.joystick.get_button():
+        #Control arm using A and B button
+        
+        if c.joystick.get_button(2):
             if not arm_down:
                 arm_down = True
                 print('\nMove arm down\n')
+                message += ",armdown,"
             else:
                 print('\nArm already down\n')
             time.sleep(0.1)
-        if c.joystick.get_button():
+        if c.joystick.get_button(1):
             if arm_down:
                 arm_down = False
                 print('\nMove arm up\n')
+                message += ",armup,"
             else:
                 print('\nArm already up\n')
             time.sleep(0.1)
@@ -279,6 +279,7 @@ while running:
             time.sleep(0.1)
         
         #print(arm_vert_axis)
+        '''
 
         # Decrease sensitivity
         if abs(x_axis) < 0.004:
