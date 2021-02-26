@@ -1,20 +1,32 @@
 import time
-import boardfrom adafruit_motorkit
-import MotorKitfrom adafruit_motor
+import board
+from adafruit_motorkit
+import MotorKit
+from adafruit_motor
 import stepper
 
 kit = MotorKit(i2c=board.I2C())
 kit.stepper1.release()
 
-def doubleStepUp():
-    for i in range(80):
-        kit.stepper1.onestep(direction=FORWARD, style=DOUBLE)
-        time.sleep(.002)
-
 def doubleStepDown():
-    for i in range(60):
-        kit.stepper1.onestep(direction=BACKWARD, style=DOUBLE)
-        time.sleep(.002)
+    for i in range(80):
+        kit.stepper1.onestep(direction = stepper.FORWARD, style = stepper.DOUBLE)
+        time.sleep(.007)
+        
+def halfStepDown():
+    for i in range(40):
+        kit.stepper1.onestep(direction = stepper.FORWARD, style = stepper.DOUBLE)
+        time.sleep(.005)
+
+def doubleStepUp():
+    for i in range(100):
+        kit.stepper1.onestep(direction = stepper.BACKWARD, style = stepper.DOUBLE)
+        time.sleep(.005)
+        
+def singleStepUp():
+    for i in range(40):
+        kit.stepper1.onestep(direction = stepper.BACKWARD, style = stepper.SINGLE)
+        time.sleep(.003)
 
 choice = 'Y'
 while choice == 'Y':

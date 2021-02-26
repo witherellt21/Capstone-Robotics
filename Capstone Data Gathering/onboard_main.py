@@ -8,17 +8,17 @@ from server import Server
 from sonar import Sonar
 import pygame
 import time
-from imu import IMU
+#from imu import IMU
 from IRsensor import IR
 from adafruit_motorkit import MotorKit
 
 
-sonars_activated = True
+sonars_activated = False
 imu_activated = False
 ir_sensor_activated = False
 motors_running = True
 server_online = True
-trigger_turn = False
+trigger_turn = True
 keyboard_control = False
 
 
@@ -120,13 +120,14 @@ while running:
 
         # Receive control data from client
         control = server.receive()
-        #print(control)
+        print(control)
 
         if control:
             datalist = control.split(',')
         # Wheels are turned at the same ratio as the joystick is held
         # M1 is right side wheel
         # M2 is left side
+        '''
         if trigger_turn:
             if datalist:
                 for data in datalist:
@@ -140,7 +141,9 @@ while running:
                         drive = float(data.split('=')[1])
                         m1_throttle = -drive
                         m2_throttle = -drive
-        elif keyboard_control:
+                        
+        '''
+        if keyboard_control:
             for data in datalist:
                 if 'forward' in data:
                     m1_throttle = 0.8
@@ -194,6 +197,17 @@ while running:
                 else:
                     m1_throttle = 0
                     m2_throttle = 0
+                    
+            if trigger_turn:
+                if datalist:
+                    if 'triggerleft' in datalist:
+                        m1_throttle = mag
+                        m2_throttle = -mag
+                    if 'triggerright' in datalist:
+                        m1_throttle = -mag
+                        m2_throttle = mag
+                    
+            
 
 
         #print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
