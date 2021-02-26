@@ -16,7 +16,7 @@ PAGE="""\
 </head>
 <body>
 <center><h1>Raspberry Pi - Surveillance Camera</h1></center>
-<center><img src="stream.mjpg" width="640" height="480"></center>
+<center><img src="stream.mjpg" width="1080" height="720"></center>
 </body>
 </html>
 """
@@ -81,12 +81,12 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
     allow_reuse_address = True
     daemon_threads = True
 
-with picamera.PiCamera(resolution='640x480', framerate=10) as camera:
+with picamera.PiCamera(resolution='640x480', framerate=20) as camera:
     output = StreamingOutput()
     #Uncomment the next line to change your Pi's Camera rotation (in degrees)
-    #camera.rotation = 90
+    #camera.rotation = 180
     
-    camera.vflip = True
+    camera.vflip = False
     camera.start_recording(output, format='mjpeg')
     try:
         address = ('', 8000)
