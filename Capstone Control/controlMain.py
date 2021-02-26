@@ -16,7 +16,7 @@ from PIL import ImageFont
 
 # Toggle simulation elements
 server_online = True
-receiving_data = True
+receiving_data = False
 pygame_running = True
 controller_connected = True
 trigger_turn = True
@@ -154,6 +154,7 @@ arm_vert_axis = 0
 arm_horiz_axis = 0
 
 claw_open = True
+arm_down = False
 
 
 # -------------------- Begin Mainloop --------------------
@@ -246,7 +247,25 @@ while running:
             else:
                 print('move arm left')
 
-
+        #Control arm using A and B button
+        '''
+        if c.joystick.get_button():
+            if not arm_down:
+                arm_down = True
+                print('\nMove arm down\n')
+            else:
+                print('\nArm already down\n')
+            time.sleep(0.1)
+        if c.joystick.get_button():
+            if arm_down:
+                arm_down = False
+                print('\nMove arm up\n')
+            else:
+                print('\nArm already up\n')
+            time.sleep(0.1)
+            
+        '''
+        
         # Pick up item using Triangle button
         if c.joystick.get_button(0):
             if claw_open:
@@ -288,7 +307,6 @@ while running:
         
         
         message += 'mag = ' + str(mag) + ", turn = " + str(turn_factor) + ","
-        print(message)
         
     controllerList.append(time.time() - controller_start)
 
