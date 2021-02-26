@@ -15,7 +15,7 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = True
+server_online = False
 receiving_data = False
 pygame_running = True
 controller_connected = True
@@ -207,6 +207,8 @@ while running:
     
     controller_start = time.time()
     if controller_connected:
+
+        print(c.joystick.get_button(3))
         
         # Use start button to quit simulation
         if c.joystick.get_button(9):
