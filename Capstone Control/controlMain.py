@@ -256,7 +256,7 @@ while running:
                 message += ",armdown,"
             else:
                 print('\nArm already down\n')
-            time.sleep(0.1)
+            time.sleep(0.01)
         if c.joystick.get_button(1):
             if arm_down:
                 arm_down = False
@@ -264,19 +264,30 @@ while running:
                 message += ",armup,"
             else:
                 print('\nArm already up\n')
-            time.sleep(0.1)
+            time.sleep(0.01)
             
-        '''
+        
         
         # Pick up item using Triangle button
+            #Open claw
         if c.joystick.get_button(0):
             if claw_open:
-                claw_open = False
-                print('\nPick up item\n')
+                print('\nClaw already open.\n')
             else:
                 print('\nDrop item\n')
                 claw_open = True
-            time.sleep(0.1)
+                message += ",clawopen,"
+            time.sleep(0.01)
+
+            #close claw
+        if c.joystick.get_button(3):
+            if claw_open:
+                claw_open = False
+                print('\nPickup Item\n')
+                message += ",clawclosed,"
+            else:
+                print('\Claw already closed.\n')
+            time.sleep(0.01)
         
         #print(arm_vert_axis)
         '''
