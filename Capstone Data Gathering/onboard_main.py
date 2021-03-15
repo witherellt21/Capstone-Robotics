@@ -16,9 +16,9 @@ from adafruit_motorkit import MotorKit
 sonars_activated = False
 imu_activated = False
 ir_sensor_activated = False
-motors_running = True
+motors_running = False
 server_online = True
-trigger_turn = True
+trigger_turn = False
 keyboard_control = False
 
 
@@ -59,6 +59,7 @@ if ir_sensor_activated:
 print("motor1")
 if motors_running:
     robot = MotorKit()
+    arm = MotorKit(address=0x61)
     print("motor2")
 print("Motor3")
 
