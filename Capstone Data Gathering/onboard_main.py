@@ -8,6 +8,8 @@ from server import Server
 from sonar import Sonar
 import pygame
 import time
+from CameraServo import Camera
+from armcontrol import Arm
 #from imu import IMU
 from IRsensor import IR
 from adafruit_motorkit import MotorKit
@@ -16,10 +18,11 @@ from adafruit_motorkit import MotorKit
 sonars_activated = False
 imu_activated = False
 ir_sensor_activated = False
-motors_running = False
+motors_running = True
 server_online = True
 trigger_turn = False
 keyboard_control = False
+camera_active = True
 
 
 # ---------------- Initialize Server -----------------
@@ -56,12 +59,17 @@ if ir_sensor_activated:
 
 
 # ---------------- Initialize Motors -----------------
-print("motor1")
+#print("motor1")
 if motors_running:
     robot = MotorKit()
-    arm = MotorKit(address=0x61)
-    print("motor2")
-print("Motor3")
+    arm = Arm(0x61)
+    #print("motor2")
+#print("Motor3")
+
+
+# ---------------- Initialize Motors -----------------
+if camera_active:
+    c = Camera(18)
 
 dist = ''
 temp = ''
@@ -121,10 +129,10 @@ while running:
 
         # Receive control data from client
         control = server.receive()
-        print(control)
 
         if control:
             datalist = control.split(',')
+            print(datalist)
         # Wheels are turned at the same ratio as the joystick is held
         # M1 is right side wheel
         # M2 is left side
@@ -167,7 +175,36 @@ while running:
                     if 'turn' in data:
                         turn_factor = round(float(data.split('=')[1]), 2)
                     if 'mag' in data:
-                        mag = round(float(data.split('=')[1]), 2)
+                        try:
+                            mag = round(float(data.split('=')[1]), 2)
+                        except:
+                            pass
+                    if data == 'cameraforward':
+                        #if not camera_direction == 'forward':
+                        c.FaceForward()
+                    if data == 'camerabackward':
+                        #if not camera_direction == 'forward':
+                        c.FaceBackward()
+                    if data == 'cameraleft':
+                        #if not camera_direction == 'forward':
+                        c.FaceLeft()
+                    if data == 'cameraright':
+                        #if not camera_direction == 'forward':
+                        c.FaceRight()
+                    if data == 'armup':
+                        if not arm.status == 'up':
+                            arm.armUp()
+                            arm.status = 'up'
+                    if data == 'armdown':
+                        if not arm.status == 'down':
+                            arm.armDown()
+                            arm.status = 'down'
+                    if data == 'clawopen':
+                        #if not camera_direction == 'forward':
+                        arm.openClaw()
+                    if data == 'clawclosed':
+                        #if not camera_direction == 'forward':
+                        arm.closeClaw()
 
                 if mag > 0:
                     if turn_factor < 0:
@@ -219,6 +256,7 @@ while running:
 
             robot.motor1.throttle = m1_throttle
             robot.motor2.throttle = m2_throttle
+        
 
     msg = ""
 

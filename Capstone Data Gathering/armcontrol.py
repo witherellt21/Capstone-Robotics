@@ -3,21 +3,33 @@ import board
 from adafruit_motorkit import MotorKit
 from adafruit_motor import stepper
 
-class Arm:
+class Arm():
 
-    def __init__(self):
-        kit = MotorKit(i2c=board.I2C())
-        kit.stepper1.release()
+    def __init__(self, _address):
+        self.kit = MotorKit(address = _address)
+        self.kit.stepper1.release()
+        
+        self.status = 'up'
 
-    def doubleStepUp(self):
-        for i in range(100):
-            kit.stepper1.onestep(direction=stepper.BACKWARD, style=stepper.DOUBLE)
-            time.sleep(.0025)
-
-    def doubleStepDown(self):
+    def armUp(self):
         for i in range(80):
-            kit.stepper1.onestep(direction=stepper.FORWARD, style=stepper.DOUBLE)
-            time.sleep(.005)
+            self.kit.stepper1.onestep(direction = stepper.BACKWARD, style = stepper.SINGLE)
+            time.sleep(0.005)
+        
+    def armDown(self):
+        for i in range(90):
+            self.kit.stepper1.onestep(direction = stepper.FORWARD, style = stepper.SINGLE)
+            time.sleep(0.005)
+            
+    def openClaw(self):
+        self.kit.motor3.throttle = 1.0
+        time.sleep(0.3)
+        self.kit.motor3.throttle = 0
+        
+    def closeClaw(self):
+        self.kit.motor3.throttle = -0.75
+        time.sleep(0.3)
+        self.kit.motor3.throttle = 0
 
 
 def main():
