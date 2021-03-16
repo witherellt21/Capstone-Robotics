@@ -10,15 +10,15 @@ import time
 import pygame
 import math
 from getData import Receiver
-from pygamePieces import Robot, Barrier, LaneRobot
+from pygamePieces import Robot, Barrier, LaneRobot, Cockpit, Compass
 from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = True
+server_online = False
 receiving_data = False
 pygame_running = True
-controller_connected = True
+controller_connected = False
 trigger_turn = False
 keyboard_control = False
 cubeDetection = False
@@ -33,27 +33,28 @@ black = (0, 0, 0)
 grey = (200, 200, 200)
 
 # GUI Attributes
-height = 700
-width = 1300
+height = 800
+width = 1400
 
-sim_height = height/2
-sim_width = height/2
-#sim_height = height
-#sim_width = width
+sim_height = height/3
+sim_width = height/3
 sim_x = 0
 sim_y = 0
 
-dist_height = sim_height
-dist_width = sim_width
-dist_x = sim_x
-dist_y = sim_y + sim_height
+cockpit_height = sim_height/2
+cockpit_width = sim_width
+cockpit_x = sim_x
+cockpit_y = sim_y + sim_height
+
+compass_height = sim_height
+compass_width = sim_width
+compass_x = sim_x
+compass_y = cockpit_y + sim_height
+
 
 
 # ---------------- Initialize Pygame -----------------
 pygame.init()
-
-def drawDivider():
-    pygame.draw.rect(sim_surface, (255,255,255), (sim_width*2/3, sim_y, sim_width/100, sim_height),0)
 
 def barrierExists(barrierList, x, y):
     for barrier in barrierList:
@@ -69,21 +70,14 @@ def displayText(surface, text, font, x, y, color, background):
     textRect.center = (x, y)
     surface.blit(txt, textRect)
 
-def drawRobotImage():
-    
-    pygame.draw.rect(dist_surface, blue, (dist_width/3, \
-                                                     dist_height/4, dist_width/3, \
-                                                     dist_height/2),0)
-    
-    #pygame.draw.rect(dist_surface, (150, 150, 150), (15, 20, dist_width/2, dist_height/2),0)
-
 
 # ---------------- Initialize Pygame Pieces -----------------
 if pygame_running:
     
     screen = pygame.display.set_mode((width, height))
     sim_surface = pygame.Surface((sim_width, sim_height))
-    dist_surface = pygame.Surface((dist_width, dist_height))
+    cockpit_surface = pygame.Surface((cockpit_width, cockpit_height))
+    compass_surface = pygame.Surface((compass_width, compass_height))
 
     if simulation == 'minimap':
         robotX = sim_width*6/7
@@ -108,14 +102,20 @@ if pygame_running:
         robotX = sim_width/2
         robotY = sim_height/2
 
-        robot_height = robot_width = sim_height /3
-        scanner_height = scanner_width = sim_height /3
-    
+        pixels_per_inch = sim_height/36
 
-        robot = LaneRobot(sim_surface, robotX, robotY, robot_height, robot_width, (255, 255, 255))
+        robot_height = 10*pixels_per_inch
+        robot_width =  8* pixels_per_inch
     
+        robot = LaneRobot(sim_surface, robotX, robotY, robot_height, robot_width, (255, 255, 255), pixels_per_inch)
+
+
+    cockpit = Cockpit(cockpit_surface, cockpit_x, cockpit_y, cockpit_height, cockpit_width)
+    compass = Compass(compass_surface, compass_x, compass_y, compass_height, compass_width)
+    orientation = 0
         
-    font = pygame.font.Font('freesansbold.ttf', 32)
+    font_14 = pygame.font.Font('freesansbold.ttf', 14)
+    font_18 = pygame.font.Font('freesansbold.ttf', 18)
     font_24 = pygame.font.Font('freesansbold.ttf', 24) 
 
 
@@ -155,12 +155,11 @@ if controller_connected:
     c = Controller()
 
 # Set control mode to either "user-controlled" or "automated
-control_mode = "user-controlled"
+control_mode = "autonomous"
 turn_factor = ''
 drive_control = 'none'
 
 mag = ''
-total_mag = math.sqrt(1 ** 2 + 1 ** 2)
 
 
 # ------------------- Configure Robot --------------------
@@ -168,8 +167,6 @@ total_mag = math.sqrt(1 ** 2 + 1 ** 2)
 camera_vert_axis = 0
 camera_horiz_axis = 0
 
-claw_open = True
-arm_down = False
 
 
 # -------------------- Begin Mainloop --------------------
@@ -217,8 +214,9 @@ while running:
                     drive_control = 'none'
                 elif event.key == pygame.K_RIGHT:
                     drive_control = 'none'
-                    
-    message += drive_control
+
+            message += drive_control
+
     
     controller_start = time.time()
     if controller_connected:
@@ -267,57 +265,16 @@ while running:
                 message += ",cameraleft,"
         
         #Control arm using A and B button
-        '''
-        if c.joystick.get_button(2):
-            if not arm_down:
-                arm_down = True
-                print('\nMove arm down\n')
-                message += ",armdown,"
-            else:
-                print('\nArm already down\n')
-            time.sleep(0.01)
-        if c.joystick.get_button(1):
-            if arm_down:
-                arm_down = False
-                print('\nMove arm up\n')
-                message += ",armup,"
-            else:
-                print('\nArm already up\n')
-            time.sleep(0.01)
-        
-        
-        
-        # Pick up item using Triangle button
-            #Open claw
-            if claw_open:
-                print('\nClaw already open.\n')
-            else:
-                print('\nDrop item\n')
-                claw_open = True
-                message += ",clawopen,"
-            time.sleep(0.01)
 
-            #close claw
-        if c.joystick.get_button(3):
-            if claw_open:
-                claw_open = False
-                print('\nPickup Item\n')
-                message += ",clawclosed,"
-            else:
-                print('\Claw already closed.\n')
-            time.sleep(0.01)
-        '''
         if c.joystick.get_button(2):
             message += ",armdown,"
-        if c.joystick.get_button(1):
+        elif c.joystick.get_button(1):
             message += ",armup,"
         
         if c.joystick.get_button(0):
             message += ",clawopen,"
-        if c.joystick.get_button(3):
+        elif c.joystick.get_button(3):
             message += ",clawclosed,"
-        
-        #print(arm_vert_axis)
         
 
         # Decrease sensitivity
@@ -342,9 +299,7 @@ while running:
 
         if x_axis:
             turn_factor = round(x_axis, 3)
-            #mag = round(math.sqrt(x_axis ** 2 + y_axis ** 2)/total_mag, 2)
-        #y_axis = round(y_axis, 3)
-        #print(x_axis, y_axis)
+            
         # Add controller input to control message
         
         
@@ -357,12 +312,12 @@ while running:
     if server_online and receiving_data:
 
         r.receive_msg()
-        #print('receieved', time.time())
         time.sleep(0.03)
 
         serverList.append(time.time() - server_start)
 
         data = r.datalist
+        
         #GET TEMPERATURE DATA
         #temp_data = r.getTemp(temp_data)
 
@@ -428,7 +383,8 @@ while running:
 
         screen.fill(white)
         sim_surface.fill(black)
-        dist_surface.fill(grey)
+        cockpit_surface.fill(black)
+        compass_surface.fill(black)
 
 
         if simulation == 'minimap':
@@ -450,69 +406,58 @@ while running:
             scanner.y += y_change
             scanner.x += x_change
 
-            #drawDivider()
             robot.draw(robot_angle)
             scanner.draw(scanner_angle)
 
-            barrierX = sim_width * 35/45
-            barrierY = sim_height * 2 / 3
-
-            if not barrierExists(barrierList, barrierX, barrierY):
-                #barrier = Barrier(screen, barrierX, barrierY, 5, 5)
-                barrier = Barrier(sim_surface, barrierX, barrierY, barrier_width, sim_height * 2/45)
-                #barrier = pygame.draw.rect(screen, (255, 255, 255), (780, 600, 40, 10),0)
-                barrierList.append(barrier)
-
-            for b in barrierList:
-                b.draw()
-                robot.displayWarnings(b)
+            #robot.displayWarnings()
         
         elif simulation == 'lanecontrol':
 
+            front = 6
+
             robot.draw()
-            
+            robot.drawBarriers(front, 3, 6, 2)
+        
+        cockpit.drawThrottles(1, 1)
+        displayText(cockpit_surface, "M1", font_14, cockpit.width*13/60, cockpit.height/16, white, black )
+        displayText(cockpit_surface, "M2", font_14, cockpit.width*26/60, cockpit.height/16, white, black )
+
+        #orientation += 0.01
+        orientation = math.pi/2
+        compass.drawCompass(orientation)
+        displayText(compass_surface, "N", font_14, compass.width *262/500, compass.height/16, white, black)
+        displayText(compass_surface, "W", font_14, compass.width *7/80, compass.height/2, white, black)
+        displayText(compass_surface, "E", font_14, compass.width *77/80, compass.height/2, white, black)
+        displayText(compass_surface, "S", font_14, compass.width *259/500, compass.height*15/16, white, black)
+
         
         # Display message when in autonomous mode
         if control_mode == "autonomous":
             mode_string = 'Mode: Autonomous'
-            displayText(sim_surface, mode_string, font_24, width * 4/7, height * 3/18, white, black)
+            displayText(screen, mode_string, font_24, width * 4/7, height * 3/18, white, black)
 
         if server_online and receiving_data:
 
             if data_status == 'GUI':
-                '''
-                ax_string = 'ax = ' + ax
-                displayText(sim_surface, ax_string, font, 300, 50, white, black)
-                ay_string = 'ay = ' + ay
-                displayText(sim_surface, ay_string, font, 300, 130, white, black)
-                az_string = 'az = ' + az
-                displayText(sim_surface, az_string, font, 300, 210, white, black)
-                gx_string = 'gx = ' + gx
-                displayText(sim_surface, gx_string, font, 300, 290, white, black)
-                gy_string = 'gy = ' + gy
-                displayText(sim_surface, gy_string, font, 300, 370, white, black)
-                gz_string = 'gz = ' + gz
-                displayText(sim_surface, gz_string, font, 300, 450, white, black)
-                '''
-                
-                front_string = 'dist = ' + front_dist
-                displayText(sim_surface, front_string, font, 300, 530, white, black)
+                pass
+                #front_string = 'dist = ' + front_dist
+                #displayText(sim_surface, front_string, font, 300, 530, white, black)
 
 
-                displayText(dist_surface, str(left_dist), font_24, dist_width*3/12, dist_height/2, black, grey)
-                displayText(dist_surface, str(right_dist), font_24, dist_width*11/12, dist_height/2, black, grey)
-                displayText(dist_surface, str(front_dist), font_24, dist_width*6/10, dist_height/8, black, grey)
-                displayText(dist_surface, str(back_dist), font_24, dist_width*6/10, dist_height*7/8, black, grey)
+                #displayText(dist_surface, str(left_dist), font_24, dist_width*3/12, dist_height/2, black, grey)
+                #displayText(dist_surface, str(right_dist), font_24, dist_width*11/12, dist_height/2, black, grey)
+                #displayText(dist_surface, str(front_dist), font_24, dist_width*6/10, dist_height/8, black, grey)
+                #displayText(dist_surface, str(back_dist), font_24, dist_width*6/10, dist_height*7/8, black, grey)
 
             # If robot detects an obstacle in close proximity, display message
             #print(front_dist)
             if float(front_dist) < 6 or not ir_data:
                 warning_string = 'You are too close to a barrier'
                 displayText(sim_surface, warning_string, font, 900, 50, white, black)
-        
-        drawRobotImage()
+    
 
-        screen.blit(dist_surface, (dist_x, dist_y))
+        screen.blit(compass_surface, (compass_x, compass_y))
+        screen.blit(cockpit_surface, (cockpit_x, cockpit_y))
         screen.blit(sim_surface, (sim_x, sim_y))
         pygame.display.update()
          
@@ -521,7 +466,6 @@ while running:
     if server_online:
         r.send_msg(message)
     
-    #print(message)
     message = ','
 
     elapsed = time.time() - start

@@ -166,7 +166,136 @@ class Robot():
             pygame.draw.rect(self.screen, (255, 0, 0), (self.x + self.width/2 + 17, self.y - self.height/2, 5, 20),0)
         else: pygame.draw.rect(self.screen, (255, 0, 0), (self.x + self.width/2 + 10, self.y - self.height/2, 5, 20),0)
 
+class LaneRobot():
 
+    def __init__(self, screen, x, y, height, width, color, pixels_per_inch):
+        self.x = x
+        self.y = y
+        self.height = height
+        self.width = width
+        self.color = color
+        self.screen = screen
+        self.center = (self.x, self.y)
+        self.surface = pygame.Surface((self.width, self.height))
+        self.angle = 0
+        self._direction = 'up'
+
+        self.ppi = pixels_per_inch
+
+    def draw(self):
+        
+        coordinates = (self.x-self.width/2, self.y-self.height/2, self.width, self.height)
+        pygame.draw.rect(self.screen, self.color, pygame.Rect(coordinates))
+        
+
+    def drawBarriers(self,front, left, right, back):
+
+        barrier_thickness = 1.5*self.ppi
+        
+        #Draw front barrier
+        front_coords = (self.x-self.width/2, self.y-self.height/2 - barrier_thickness - front*self.ppi, self.width, barrier_thickness)
+        pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(front_coords))
+
+        #Draw left barrier
+        left_coords = (self.x-self.width/2 - barrier_thickness - left*self.ppi, self.y-self.height/2, barrier_thickness, self.height)
+        pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(left_coords))
+
+        #Draw right barrier
+        right_coords = (self.x+self.width/2 + right*self.ppi, self.y-self.height/2, barrier_thickness, self.height)
+        pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(right_coords))
+
+        #Draw back barrier
+        back_coords = (self.x-self.width/2, self.y+self.height/2 + back*self.ppi, self.width, barrier_thickness)
+        pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(back_coords))
+
+class Cockpit():
+
+    def __init__(self, screen, x, y, height, width):
+
+        self.screen = screen
+        self.height = height
+        self.width = width
+
+        #self.center = self.x + self. heig
+
+    def drawThrottles(self, m1, m2):
+
+        offset= -10
+        angle = math.tanh((self.width/15)/(self.height*40/50))
+
+        self.height*45/50 - m1 * self.height*40/50
+
+        width_m1 = (self.height*45/50-(self.height* 45/50 - m1 * self.height*40/50)) *math.tan(angle)
+        width_m2 = (self.height*45/50-(self.height* 45/50 - m2 * self.height*40/50)) *math.tan(angle)
+
+
+        point_of_triangle = (self.width /6, self.height * 45/50 - offset)
+        top_left = (self.width/6 - width_m1, self.height* 45/50 - m1 * self.height*40/50 -offset )
+        top_right = (self.width/6 + width_m1, self.height* 45/50 - m1 * self.height*40/50 -offset)
+        coordinates = [top_left, point_of_triangle, top_right]
+
+        m2_point_of_triangle = (self.width *4/10, self.height * 45/50 - offset)
+        
+        m2_top_left = (self.width*4/10-width_m2, self.height* 45/50 - m2 * self.height*40/50 - offset)
+        m2_top_right = (self.width*4/10+width_m2, self.height* 45/50 - m2 * self.height*40/50 - offset)
+        m2_coordinates = [m2_top_left, m2_point_of_triangle, m2_top_right]
+
+        pygame.draw.polygon(self.screen, (255, (1-m1)*255, 0), coordinates)
+        pygame.draw.polygon(self.screen, (255, (1-m2)*255, 0), m2_coordinates)
+
+    def drawIntensity(self, intensity):
+        pass
+        
+
+
+class Compass():
+
+    def __init__(self, screen, x, y, height, width):
+        self.screen = screen
+        self.height = height
+        self.width = width
+
+    def drawCompass(self, orientation):
+
+        steps = 20
+        tick_spacing = 2*math.pi/steps
+
+        angle = 0
+        while angle <= 2*math.pi:
+
+            x = math.cos(angle)
+            y = math.sin(angle)
+
+            radius = self.width/3
+            radius2 = self.width/3 + 8
+            
+            bottom_right = (self.width/2 + math.cos(angle-.01)*radius, self.height/2 - math.sin(angle-0.01)*radius)
+            bottom_left = (self.width/2 + math.cos(angle+.01)*radius, self.height/2 - math.sin(angle+0.01)*radius)
+            top_right = (self.width/2 + math.cos(angle-.01)*radius2, self.height/2 - math.sin(angle-0.01)*radius2)
+            top_left = (self.width/2 + math.cos(angle+.01)*radius2, self.height/2 - math.sin(angle+0.01)*radius2)
+
+            coordinates = (top_left, bottom_left, bottom_right, top_right)
+            pygame.draw.polygon(self.screen, (255, 255, 255), coordinates)
+
+            angle += tick_spacing
+
+
+        bottom_right = (self.width/2 + math.cos(orientation-math.pi/2)*8, self.height/2 - math.sin(orientation-math.pi/2)*8)
+        bottom_left = (self.width/2 + math.cos(orientation+math.pi/2)*8, self.height/2 - math.sin(orientation+math.pi/2)*8)
+        top = (self.width/2 + math.cos(orientation)*100, self.height/2 - math.sin(orientation)*100)
+
+        coordinates = (bottom_right, top, bottom_left)
+
+        pygame.draw.polygon(self.screen, (255, 0 , 0), coordinates)
+
+            
+
+            
+
+            
+
+        
+        
 
 class Barrier():
 
