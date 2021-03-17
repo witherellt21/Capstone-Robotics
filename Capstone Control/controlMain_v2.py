@@ -18,7 +18,7 @@ from PIL import ImageFont
 server_online = False
 receiving_data = False
 pygame_running = True
-controller_connected = False
+controller_connected = True
 trigger_turn = False
 keyboard_control = False
 cubeDetection = False
@@ -229,16 +229,17 @@ while running:
         scan_axis, x_axis, y_axis = c.get_axes()
         y_axis = - y_axis
 
+        trigger = ''
         if trigger_turn:
             # Get trigger data to control turning
             if c.joystick.get_button(6):
                 robot_angle += 2
                 scanner_angle += 2
-                message += ",triggerleft,"
+                trigger =  "triggerleft"
             if c.joystick.get_button(7):
                 robot_angle -= 2
                 scanner_angle -= 2
-                message += ",triggerright,"
+                trigger = "triggerright"
 
         # Set robot to autonomous mode
         if c.joystick.get_button(8):
@@ -301,9 +302,42 @@ while running:
             turn_factor = round(x_axis, 3)
             
         # Add controller input to control message
+
+        if mag > 0:
+            if turn_factor < 0:
+                m1_throttle = mag
+                m2_throttle = mag + turn_factor
+            elif turn_factor > 0:
+                m1_throttle = mag - turn_factor
+                m2_throttle = mag
+            else:
+                m1_throttle = mag
+                m2_throttle = mag
+        elif mag < 0:
+            if turn_factor < 0:
+                m1_throttle = mag
+                m2_throttle = mag - turn_factor
+            elif turn_factor > 0:
+                m1_throttle = mag + turn_factor
+                m2_throttle = mag
+            else:
+                m1_throttle = mag
+                m2_throttle = mag
+        else:
+            m1_throttle = 0
+            m2_throttle = 0
+
+            
+        if trigger_turn:
+            if trigger == 'triggerleft':
+                m1_throttle = mag
+                m2_throttle = -mag
+            if trigger == 'triggerright':
+                m1_throttle = -mag
+                m2_throttle = mag
         
         
-        message += 'mag = ' + str(mag) + ", turn = " + str(turn_factor) + ","
+        message += 'm1 = ' + str(m1_throttle) + ", m2 = " + str(m2_throttle) + ","
         
     controllerList.append(time.time() - controller_start)
 
@@ -440,15 +474,7 @@ while running:
 
             if data_status == 'GUI':
                 pass
-                #front_string = 'dist = ' + front_dist
-                #displayText(sim_surface, front_string, font, 300, 530, white, black)
-
-
-                #displayText(dist_surface, str(left_dist), font_24, dist_width*3/12, dist_height/2, black, grey)
-                #displayText(dist_surface, str(right_dist), font_24, dist_width*11/12, dist_height/2, black, grey)
-                #displayText(dist_surface, str(front_dist), font_24, dist_width*6/10, dist_height/8, black, grey)
-                #displayText(dist_surface, str(back_dist), font_24, dist_width*6/10, dist_height*7/8, black, grey)
-
+            
             # If robot detects an obstacle in close proximity, display message
             #print(front_dist)
             if float(front_dist) < 6 or not ir_data:

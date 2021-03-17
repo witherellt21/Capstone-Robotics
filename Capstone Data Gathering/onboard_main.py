@@ -172,85 +172,38 @@ while running:
         else:
             if datalist:
                 for data in datalist:
-                    if 'turn' in data:
-                        turn_factor = round(float(data.split('=')[1]), 2)
-                    if 'mag' in data:
+                    if 'm1' in data:
                         try:
-                            mag = round(float(data.split('=')[1]), 2)
+                            m1_throttle = round(float(data.split('=')[1]), 2)
                         except:
                             pass
-                    if data == 'cameraforward':
-                        #if not camera_direction == 'forward':
+                    elif 'm2' in data:
+                        try:
+                            m2_throttle = round(float(data.split('=')[1]), 2)
+                        except:
+                            pass
+                    elif data == 'cameraforward':
                         c.FaceForward()
-                    if data == 'camerabackward':
-                        #if not camera_direction == 'forward':
+                    elif data == 'camerabackward':
                         c.FaceBackward()
-                    if data == 'cameraleft':
-                        #if not camera_direction == 'forward':
+                    elif data == 'cameraleft':
                         c.FaceLeft()
-                    if data == 'cameraright':
-                        #if not camera_direction == 'forward':
+                    elif data == 'cameraright':
                         c.FaceRight()
-                    if data == 'armup':
+                    elif data == 'armup':
                         if not arm.status == 'up':
                             arm.armUp()
                             arm.status = 'up'
-                    if data == 'armdown':
+                    elif data == 'armdown':
                         if not arm.status == 'down':
                             arm.armDown()
                             arm.status = 'down'
-                    if data == 'clawopen':
-                        #if not camera_direction == 'forward':
+                    elif data == 'clawopen':
                         arm.openClaw()
-                    if data == 'clawclosed':
-                        #if not camera_direction == 'forward':
+                    elif data == 'clawclosed':
                         arm.closeClaw()
-
-                if mag > 0:
-                    if turn_factor < 0:
-                        m1_throttle = mag
-                        m2_throttle = mag + turn_factor
-                    elif turn_factor > 0:
-                        m1_throttle = mag - turn_factor
-                        m2_throttle = mag
-                    else:
-                        m1_throttle = mag
-                        m2_throttle = mag
-                elif mag < 0:
-                    if turn_factor < 0:
-                        m1_throttle = mag
-                        m2_throttle = mag - turn_factor
-                    elif turn_factor > 0:
-                        m1_throttle = mag + turn_factor
-                        m2_throttle = mag
-                    #elif turn_factor == - 1:
-                        #m1_throttle = mag
-                        #m2_throttle = - mag
-                    #elif turn_factor == 1:
-                        #m1_throttle = -mag
-                        #m2_throttle = mag
-                    else:
-                        m1_throttle = mag
-                        m2_throttle = mag
-                else:
-                    m1_throttle = 0
-                    m2_throttle = 0
-                    
-            if trigger_turn:
-                if datalist:
-                    if 'triggerleft' in datalist:
-                        m1_throttle = mag
-                        m2_throttle = -mag
-                    if 'triggerright' in datalist:
-                        m1_throttle = -mag
-                        m2_throttle = mag
-                    
             
-
-
-        #print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
-        #print('')
-        #print('')
+        print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
 
         if motors_running:
 
