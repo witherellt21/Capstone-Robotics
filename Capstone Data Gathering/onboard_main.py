@@ -70,7 +70,7 @@ if motors_running:
 
     
 # ---------------- Initialize Cube Sensor -----------------
-ser = serial.Serial(port='/dev/ttyS0', baudrate = 9600)
+ser = serial.Serial(port='/dev/ttyAMA0', baudrate = 9600, timeout=1)
 
 # ---------------- Initialize Camera -----------------
 if camera_active:
@@ -83,6 +83,8 @@ acc = ''
 ir_status = 1
 msg = ''
 
+arm_status = ''
+
 control = 'stop'
 drive = 0
 turn_status = "None"
@@ -94,11 +96,14 @@ distances = []
 
 running = True
 while running:
+    print('hi')
 
-    if server.disconnect_counter > 10:
-        server.receiveConnection()
+    if server_online:
+        
+        if server.disconnect_counter > 10:
+            server.receiveConnection()
 
-        print('Connection Received')
+            print('Connection Received')
 
     if sonars_activated:
         front_dist = round(s_front.distance(), 2)   # Get sonars distance data
@@ -119,14 +124,18 @@ while running:
         ir_status = ir.status()   # Print status of proximity sensor
 
     if cubesensor_active:
-        sensor1 = ser.read()
-        sensor2 = ser.read()
-
+        print('hi2')
+        sensor1 = ser.read(1)
+        sensor2 = ser.read(1)
+        
         print(sensor1, sensor2)
+
+    if motors_running:
+        arm_status = arm.status
 
     # Compile a data string to send to the client
     msg = "sonar = " + str(distances) + ",, temp = " + str(temp) + ",, accel = " + str(acc) + \
-            ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status)
+            ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status) + ',,arm =' + str(arm_status) + ',,cube1 =' + str(sensor1) + ',,cube2 =' + str(sensor1) 
 
     #time.sleep(3)
     if server_online:
