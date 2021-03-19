@@ -14,6 +14,8 @@ from armcontrol import Arm
 from IRsensor import IR
 from adafruit_motorkit import MotorKit
 import serial
+from usfs import USFS_Master
+import math
 
 
 sonars_activated = False
@@ -24,7 +26,8 @@ server_online = False
 trigger_turn = False
 keyboard_control = False
 camera_active = False
-cubesensor_active = True
+cubesensor_active = False
+usfs_active = True
 
 
 # ---------------- Initialize Server -----------------
@@ -70,7 +73,45 @@ if motors_running:
 
     
 # ---------------- Initialize Cube Sensor -----------------
-ser = serial.Serial(port='/dev/ttyAMA0', baudrate = 9600, timeout=1)
+if cubesensor_active:
+    ser = serial.Serial(port='/dev/ttyAMA0', baudrate = 9600, timeout=1)
+    
+    
+    
+    
+    
+# ---------------- Initialize USFS -----------------
+if usfs_active:
+    MAG_RATE = 100
+    ACCEL_RATE = 200
+    GYRO_RATE = 200
+    BARO_RATE = 50
+    Q_RATE_DIVISOR = 3
+    
+    usfs = USFS_Master(MAG_RATE, ACCEL_RATE, GYRO_RATE, BARO_RATE, Q_RATE_DIVISOR)
+    
+    if not usfs.begin():
+        print(usfs.getErrorString())
+        exit(1)
+        
+    usfs.checkEventStatus()
+    
+    if usfs.gotError():
+        print('ERROR: ' + usfs.getErrorString())
+        exit(1)
+    
+    if (usfs.gotQuaternion()):
+        
+        qw, qx, qy, qz = usfs.readQuaternion()
+        
+        yaw = math.atan2(2.0 * (qx * qy + qw * qz), qw * qw + qx * qx - qy * qy - qz * qz)
+        
+        yaw *= 180.0 / math.pi
+        yaw += 9.1
+        if yaw < 0: yaw += 360.0
+        
+
+
 
 # ---------------- Initialize Camera -----------------
 if camera_active:
@@ -129,6 +170,18 @@ while running:
         sensor2 = ser.read(1)
         
         print(sensor1, sensor2)
+        
+        
+        
+        
+        
+    if usfs_active:
+        pass
+
+
+
+
+
 
     if motors_running:
         arm_status = arm.status

@@ -7,29 +7,29 @@ class Arm():
 
     def __init__(self, _address):
         self.kit = MotorKit(address = _address)
-        self.kit.stepper1.release()
+        self.kit.stepper2.release()
         
         self.status = 'up'
 
     def armUp(self):
         for i in range(80):
-            self.kit.stepper1.onestep(direction = stepper.BACKWARD, style = stepper.SINGLE)
+            self.kit.stepper2.onestep(direction = stepper.FORWARD, style = stepper.SINGLE)
             time.sleep(0.005)
         
     def armDown(self):
         for i in range(90):
-            self.kit.stepper1.onestep(direction = stepper.FORWARD, style = stepper.SINGLE)
+            self.kit.stepper2.onestep(direction = stepper.BACKWARD, style = stepper.SINGLE)
             time.sleep(0.005)
             
     def openClaw(self):
-        self.kit.motor3.throttle = 1.0
+        self.kit.motor1.throttle = 1.0
         time.sleep(0.3)
-        self.kit.motor3.throttle = 0
+        self.kit.motor1.throttle = 0
         
     def closeClaw(self):
-        self.kit.motor3.throttle = -0.75
+        self.kit.motor1.throttle = -0.75
         time.sleep(0.3)
-        self.kit.motor3.throttle = 0
+        self.kit.motor1.throttle = 0
 
 
 def main():
