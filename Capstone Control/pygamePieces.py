@@ -3,53 +3,53 @@ import pygame
 
 def drawArrow(angle, x, y, height, width, cx, cy):
 
-        tip = (x, y -height/2)
-        right_corner = (x+width/2, y -height/5)
-        left_corner = (x-width/2, y -height/5)
+    tip = (x, y -height/2)
+    right_corner = (x+width/2, y -height/5)
+    left_corner = (x-width/2, y -height/5)
 
-        top_left = (x-width/5, y -height/2 + 10)
-        top_right = (x+width/5, y -height/2 + 10)
-        bottom_left = (x-width/4, y +height/2)
-        bottom_right = (x+width/4, y +height/2)
+    top_left = (x-width/5, y -height/2 + 10)
+    top_right = (x+width/5, y -height/2 + 10)
+    bottom_left = (x-width/4, y +height/2)
+    bottom_right = (x+width/4, y +height/2)
 
-        coordinates = (tip, right_corner, left_corner)
-        coordinates2 = (top_left, top_right, bottom_right, bottom_left)
+    coordinates = (tip, right_corner, left_corner)
+    coordinates2 = (top_left, top_right, bottom_right, bottom_left)
 
-        coordinates3 = []
-        coordinates3 = []
-        for i in range(len(coordinates)):
-            coordinates3.append(rotate(cx, cy, angle*math.pi/180, coordinates[i]))
+    coordinates3 = []
+    coordinates3 = []
+    for i in range(len(coordinates)):
+        coordinates3.append(rotate(cx, cy, angle*math.pi/180, coordinates[i]))
 
-        coordinates4 = []
-        for i in range(len(coordinates2)):
-            coordinates4.append(rotate(cx, cy, angle*math.pi/180, coordinates2[i]))
+    coordinates4 = []
+    for i in range(len(coordinates2)):
+        coordinates4.append(rotate(cx, cy, angle*math.pi/180, coordinates2[i]))
 
-        coordinates3 = tuple(coordinates3)
-        coordinates4 = tuple(coordinates4)
+    coordinates3 = tuple(coordinates3)
+    coordinates4 = tuple(coordinates4)
 
-        return coordinates3, coordinates4
+    return coordinates3, coordinates4
 
 def rotate( x, y, angle, p):
 
-        s = math.sin(angle)
-        c = math.cos(angle)
-        # translate point back to origin:
+    s = math.sin(angle)
+    c = math.cos(angle)
+    # translate point back to origin:
 
-        p = list(p)
+    p = list(p)
 
-        p[0] -= x
-        p[1] -= y
+    p[0] -= x
+    p[1] -= y
 
-        # rotate point
+    # rotate point
 
-        xnew = p[0] * c - p[1] * s
-        ynew = p[0] * s + p[1] * c
+    xnew = p[0] * c - p[1] * s
+    ynew = p[0] * s + p[1] * c
 
-        # translate point back:
-        p[0] = xnew + x
-        p[1] = ynew + y
-        
-        return tuple(p)
+    # translate point back:
+    p[0] = xnew + x
+    p[1] = ynew + y
+    
+    return tuple(p)
 
 
 class Robot():
@@ -296,46 +296,95 @@ class Cockpit():
         offset = -5
         angle = math.tanh((self.width/15)/(self.height*40/50))
 
-        self.height*45/50 - m1 * self.height*40/50
-
-        width_m1 = (self.height*45/50-(self.height* 45/50 - m1 * self.height*40/50)) *math.tan(angle)
         width_m2 = (self.height*45/50-(self.height* 45/50 - m2 * self.height*40/50)) *math.tan(angle)
+        width_m1 = (self.height*45/50-(self.height* 45/50 - m1 * self.height*40/50)) *math.tan(angle)
 
         point_of_triangle = (self.width /6, self.height * 25/50 - offset)
-        top_left = (self.width/6 - width_m1, self.height* 25/50 - m1* self.height*20/50 -offset )
-        top_right = (self.width/6 + width_m1, self.height* 25/50 -  m1* self.height*20/50 -offset)
+        top_left = (self.width/6 - width_m2, self.height* 25/50 - m2* self.height*20/50 -offset )
+        top_right = (self.width/6 + width_m2, self.height* 25/50 -  m2* self.height*20/50 -offset)
 
         coordinates = [top_left, point_of_triangle, top_right]
 
-        m2_point_of_triangle = (self.width *4/10, self.height * 25/50 - offset)
+        m1_point_of_triangle = (self.width *4/10, self.height * 25/50 - offset)
         
-        m2_top_left = (self.width*4/10-width_m2, self.height* 25/50 - m2 * self.height*20/50 - offset)
-        m2_top_right = (self.width*4/10+width_m2, self.height* 25/50 - m2 * self.height*20/50 - offset)
-        m2_coordinates = [m2_top_left, m2_point_of_triangle, m2_top_right]
+        m1_top_left = (self.width*4/10-width_m1, self.height* 25/50 - m1 * self.height*20/50 - offset)
+        m1_top_right = (self.width*4/10+width_m1, self.height* 25/50 - m1 * self.height*20/50 - offset)
+        m1_coordinates = [m1_top_left, m1_point_of_triangle, m1_top_right]
 
-        if m1:
-                pygame.draw.polygon(self.screen, (255, (1-m1)*255, 0), coordinates)
-        if m2:
-                pygame.draw.polygon(self.screen, (255, (1-m2)*255, 0), m2_coordinates)
+
+        green_m1 = (1-m1)*255
+        green_m2 = (1-m2)*255
+
+        pygame.draw.polygon(self.screen, (255, green_m2, 0), coordinates)
+        pygame.draw.polygon(self.screen, (255, green_m1, 0), m1_coordinates)
 
         pygame.draw.line(self.screen, (255, 255, 255), (0, self.height * 30/50), (self.width, self.height*30/50), 2)
 
-    def drawIntensity(self, intensity):
-        
-        pygame.draw.rect(self.screen, (255, 255, 255), (self.width*2.1/3, self.height*5/50, self.width/7.7, self.height/2.3))
-        pygame.draw.rect(self.screen, (0, 0, 0 ), (self.width*2.138/3, self.height*5.5/50, self.width/10, self.height/2.45))
-        
-    def drawArrowArm(self, direction):
+    def drawIntensity(self, intensity1, intensity2):
 
-        if direction == 'up':
-            coordinates1, coordinates2 = drawArrow(0, self.width/10, self.height*17/20, 40, 20, self.width/10, self.height*17/20)
+        def getCoordinates(height, width, x, y, purpose, intensity=1):
+
+            if purpose == 'outline':
+                top_left = (x - width/2, y - height/2)
+                top_right = (x + width/2, y - height/2)
+                bottom_left = (x - width/2, y + height/2)
+                bottom_right = (x + width/2, y + height/2)
+
+                coordinates = (top_left, top_right, bottom_right, bottom_left)
+
+            elif purpose == 'meter':
+                top_left = (x - width/2, y - intensity * height)
+                top_right = (x + width/2, y - intensity * height)
+                bottom_left = (x - width/2, y)
+                bottom_right = (x + width/2, y)
+
+                coordinates = (top_left, top_right, bottom_right, bottom_left)
+        
+            return coordinates
+
+
+        x1 = self.width*20/30
+        y1 = self.height/3
+
+        x2 = self.width*25/30
+        y2 = self.height/3
+        
+        height = 90
+        width = 30
+        
+        pygame.draw.polygon(self.screen, (255, 255, 255), getCoordinates(height, width, x1, y1, 'outline'))
+        pygame.draw.polygon(self.screen, (255, 255, 255), getCoordinates(height, width, x2, y2, 'outline'))
+
+        height = 85
+        width = 25
+        
+        pygame.draw.polygon(self.screen, (0, 0, 0), getCoordinates(height, width, x1, y1, 'outline'))
+        pygame.draw.polygon(self.screen, (0, 0, 0), getCoordinates(height, width, x2, y2, 'outline'))
+        
+        pygame.draw.polygon(self.screen, (255, (1-intensity1)*255, 0), getCoordinates(height, width, x1, y1+height/2, 'meter', intensity1))
+        pygame.draw.polygon(self.screen, (255, (1-intensity2)*255, 0), getCoordinates(height, width, x2, y2+height/2, 'meter', intensity2))
+        
+    def drawArrowArm(self, armup):
+
+        if armup:
+            coordinates1, coordinates2 = drawArrow(0, self.width/8, self.height*17/20, 40, 20, self.width/8, self.height*17/20)
+
+        else:
+            coordinates1, coordinates2 = drawArrow(180, self.width/8, self.height*17/20, 40, 20, self.width/8, self.height*17/20)
             
         rect = pygame.draw.polygon(self.screen, (255, 255, 255), coordinates2)
         triangle = pygame.draw.polygon(self.screen, (255, 255, 255), coordinates1)
 
+    def autoSignal(self, auto):
 
+        if auto:
+            pygame.draw.circle(self.screen, (0, 255, 0), (int(self.width*18.7/50), int(self.height*34/40)), int(self.width/18))
+        else:
+            pygame.draw.circle(self.screen, (255, 0, 0), (int(self.width*18.7/50), int(self.height*34/40)), int(self.width/18))
+
+        
 class Compass():
-
+    
     def __init__(self, screen, x, y, height, width):
         self.screen = screen
         self.height = height
@@ -373,11 +422,6 @@ class Compass():
         coordinates = (bottom_right, top, bottom_left)
 
         pygame.draw.polygon(self.screen, (255, 0 , 0), coordinates)
-
-            
-
-            
-
             
 
         

@@ -18,7 +18,7 @@ from PIL import ImageFont
 server_online = False
 receiving_data = False
 pygame_running = True
-controller_connected = False
+controller_connected = True
 trigger_turn = False
 keyboard_control = False
 cubeDetection = False
@@ -158,7 +158,7 @@ if controller_connected:
     c = Controller()
 
 # Set control mode to either "user-controlled" or "automated
-control_mode = "autonomous"
+control_mode = "user-controlled"
 turn_factor = ''
 drive_control = 'none'
 
@@ -170,6 +170,10 @@ mag = ''
 armup = True
 m1_throttle = 0
 m2_throttle = 0
+
+camera_vert_axis = 0
+camera_horiz_axis = 0
+
 
 
 # -------------------- Begin Mainloop --------------------
@@ -272,8 +276,10 @@ while running:
 
         if c.joystick.get_button(2):
             message += ",armdown,"
+            armup = False
         elif c.joystick.get_button(1):
             message += ",armup,"
+            armup = True
         
         if c.joystick.get_button(0):
             message += ",clawopen,"
@@ -471,42 +477,28 @@ while running:
             robot.drawPredictionArrow(turn_prediction)
 
 
-        cockpit.drawThrottles(m1_throttle, m2_throttle)
-        cockpit.drawIntensity(5)
+        cockpit.drawThrottles(abs(m1_throttle), abs(m2_throttle))
+        cockpit.drawIntensity(.9, .6)
         displayText(cockpit_surface, "M1", font_14, cockpit.width*13/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "M2", font_14, cockpit.width*26/60, cockpit.height/25, white, black )
-        displayText(cockpit_surface, "Intensity", font_14, cockpit.width*53/60, cockpit.height/25, white, black )
+        displayText(cockpit_surface, "EMF INTENSITY", font_14, cockpit.width*57/60, cockpit.height/25, white, black )
 
-        if armup:
-            cockpit.drawArrowArm('up')
-            #cockpit.drawArrow('up', 'arm')
-            #cockpit.drawArrow('up', 'arm')
+        cockpit.drawArrowArm(armup)
 
+        cockpit.autoSignal(control_mode == 'autonomous')
+        pygame.draw.line(cockpit_surface, (255, 255, 255), (cockpit.width/4, cockpit.height*30/50), (cockpit.width/4, cockpit.height), 2)
+        pygame.draw.line(cockpit_surface, (255, 255, 255), (cockpit.width/2, cockpit.height*30/50), (cockpit.width/2, cockpit.height), 2)
+        pygame.draw.line(cockpit_surface, (255, 255, 255), (cockpit.width*3/4, cockpit.height*30/50), (cockpit.width*3/4, cockpit.height), 2)
 
-        #orientation += 0.01
+        displayText(cockpit_surface, "Arm", font_14, cockpit.width/6, cockpit.height*28/40, white, black)
+        displayText(cockpit_surface, "Auto?", font_14, cockpit.width*22.5/50, cockpit.height*28/40, white, black)
+
         orientation = math.pi/2
         compass.drawCompass(orientation)
         displayText(compass_surface, "N", font_14, compass.width *262/500, compass.height/16, white, black)
         displayText(compass_surface, "W", font_14, compass.width *7/80, compass.height/2, white, black)
         displayText(compass_surface, "E", font_14, compass.width *77/80, compass.height/2, white, black)
         displayText(compass_surface, "S", font_14, compass.width *259/500, compass.height*15/16, white, black)
-        
-        # Display message when in autonomous mode
-        if control_mode == "autonomous":
-            mode_string = 'Mode: Autonomous'
-            displayText(screen, mode_string, font_24, width * 4/7, height * 3/18, white, black)
-
-        if server_online and receiving_data:
-
-            if data_status == 'GUI':
-                pass
-            
-            # If robot detects an obstacle in close proximity, display message
-            #print(front_dist)
-            if float(front_dist) < 6 or not ir_data:
-                warning_string = 'You are too close to a barrier'
-                displayText(sim_surface, warning_string, font, 900, 50, white, black)
-    
 
         screen.blit(compass_surface, (compass_x, compass_y))
         screen.blit(cockpit_surface, (cockpit_x, cockpit_y))
