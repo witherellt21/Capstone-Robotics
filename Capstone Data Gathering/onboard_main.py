@@ -16,15 +16,15 @@ from adafruit_motorkit import MotorKit
 import serial
 
 
-sonars_activated = False
+sonars_activated = True
 imu_activated = False
 ir_sensor_activated = False
-motors_running = False
-server_online = False
+motors_running = True
+server_online = True
 trigger_turn = False
 keyboard_control = False
-camera_active = False
-cubesensor_active = True
+camera_active = True
+cubesensor_active = False
 
 
 # ---------------- Initialize Server -----------------
@@ -43,10 +43,11 @@ if server_online:
 # ----------------- Initialize Sonar -----------------
 if sonars_activated:
     print("Sonars1")
-    s_front = Sonar(12, 6)
-    s_left = Sonar(4, 17)
-    s_right = Sonar(27, 22)
-    s_back = Sonar(23, 24)
+    s_front = Sonar(6, 22)
+    s_left = Sonar(5, 23)
+    s_right = Sonar(16, 17)
+    #s_backright = Sonar(23, 24)
+    #s_backleft = Sonar(23, 24)
     print("Sonars")
 
 
@@ -70,7 +71,7 @@ if motors_running:
 
     
 # ---------------- Initialize Cube Sensor -----------------
-ser = serial.Serial(port='/dev/ttyAMA0', baudrate = 9600, timeout=1)
+#ser = serial.Serial(port='/dev/ttyAMA0', baudrate = 9600, timeout=1)
 
 # ---------------- Initialize Camera -----------------
 if camera_active:
@@ -93,10 +94,12 @@ m1_throttle = 0
 m2_throttle = 0
 
 distances = []
+backleft_dist = '0'
+backright_dist = '0'
+
 
 running = True
 while running:
-    print('hi')
 
     if server_online:
         
@@ -109,12 +112,13 @@ while running:
         front_dist = round(s_front.distance(), 2)   # Get sonars distance data
         left_dist = round(s_left.distance(), 2)
         right_dist = round(s_right.distance(), 2)
-        back_dist = round(s_back.distance(), 2)
-        if front_dist <= 6:
-            if motors_running:
-                control = 'stop'
+        #backleft_dist = round(s_backleft.distance(), 2)
+        #backright_dist = round(s_backright.distance(), 2)
+        #if front_dist <= 6:
+            #if motors_running:
+                #control = 'stop'
 
-        distances = [front_dist, right_dist, back_dist, left_dist]
+        distances = [front_dist, right_dist, backleft_dist, backright_dist, left_dist]
 
     if imu_activated:
         ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
@@ -124,11 +128,9 @@ while running:
         ir_status = ir.status()   # Print status of proximity sensor
 
     if cubesensor_active:
-        print('hi2')
         sensor1 = ser.read(1)
         sensor2 = ser.read(1)
         
-        print(sensor1, sensor2)
 
     if motors_running:
         arm_status = arm.status
