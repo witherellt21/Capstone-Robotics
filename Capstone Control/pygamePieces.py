@@ -364,12 +364,12 @@ class Cockpit():
         pygame.draw.polygon(self.screen, (255, (1-intensity1)*255, 0), getCoordinates(height, width, x1, y1+height/2, 'meter', intensity1))
         pygame.draw.polygon(self.screen, (255, (1-intensity2)*255, 0), getCoordinates(height, width, x2, y2+height/2, 'meter', intensity2))
         
-    def drawArrowArm(self, armup):
+    def drawArrowArm(self, arm_status):
 
-        if armup:
+        if arm_status == 'up':
             coordinates1, coordinates2 = drawArrow(0, self.width/8, self.height*17/20, 40, 20, self.width/8, self.height*17/20)
 
-        else:
+        elif arm_status == 'down':
             coordinates1, coordinates2 = drawArrow(180, self.width/8, self.height*17/20, 40, 20, self.width/8, self.height*17/20)
             
         rect = pygame.draw.polygon(self.screen, (255, 255, 255), coordinates2)

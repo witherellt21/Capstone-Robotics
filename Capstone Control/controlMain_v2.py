@@ -139,6 +139,8 @@ backright_dist = '0'
 left_dist = '0'
 right_dist = '0'
 ir_data = 1
+usfs_data = '0'
+arm_data = 'up'
 
 turn_prediction = 'forward'
 
@@ -167,7 +169,7 @@ mag = ''
 
 # ------------------- Configure Robot --------------------
 
-armup = True
+arm_status == 'up'
 m1_throttle = 0
 m2_throttle = 0
 
@@ -368,7 +370,7 @@ while running:
         sonar_data = r.getSonar(sonar_data)
         sonar_total = sonar_data.split(',')
 
-        if len(sonar_total) == 4:
+        if len(sonar_total) == 5:
             front_dist = sonar_total[0].strip('[')
             right_dist = sonar_total[1]
             backleft_dist = sonar_total[2]
@@ -386,6 +388,7 @@ while running:
             ay = a_datalist[1]
             az = a_datalist[2].strip(']')
 
+        '''
         #GET GYROSCOPE DATA
         gyro_data = r.getGyro(gyro_data)
         g_datalist = gyro_data.split(',')
@@ -397,8 +400,27 @@ while running:
             if 'sonar' in g_datalist[2]:
                 gz = g_datalist[2].strip(']sonar')
             else: gz = g_datalist[2].strip(']')
-        
 
+        '''
+        
+        #GET ARM DATA
+        arm_data = r.getArm(arm_data)
+
+        if arm_data == 'up':
+            arm_status = 'up'
+
+        elif arm_data == 'down':
+            arm_status = 'down'
+            
+            
+        #GET USFS DATA
+        #usfs_data = r.getUSFS(usfs_data)
+        #usfs_datalist = usfs_data.split(',')
+
+        #GET CUBE SENSOR DATA
+        #emf_data = r.getEMF(emf_data)
+        #emf_datalist = emf_data.split(',')
+        
         if data_status == 'printing':
             print('\n')
             print('ax =', ax)
@@ -483,7 +505,7 @@ while running:
         displayText(cockpit_surface, "M2", font_14, cockpit.width*26/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "EMF INTENSITY", font_14, cockpit.width*57/60, cockpit.height/25, white, black )
 
-        cockpit.drawArrowArm(armup)
+        cockpit.drawArrowArm(arm_status)
 
         cockpit.autoSignal(control_mode == 'autonomous')
         pygame.draw.line(cockpit_surface, (255, 255, 255), (cockpit.width/4, cockpit.height*30/50), (cockpit.width/4, cockpit.height), 2)
