@@ -25,19 +25,16 @@ motors_running = True
 server_online = True
 trigger_turn = False
 keyboard_control = False
-<<<<<<< HEAD
-camera_active = False
-cubesensor_active = False
-usfs_active = True
 camera_active = True
 cubesensor_active = False
+usfs_active = False
 
 
 # ---------------- Initialize Server -----------------
 if server_online:
     # Set the client to the server's IP and PORT address
     IP = '192.168.2.2'
-    PORT = 10000
+    PORT = 49767
     server = Server(IP, PORT)
 
     server.start()
@@ -46,15 +43,15 @@ if server_online:
     print('Connection Received')
 
 
+
+
 # ----------------- Initialize Sonar -----------------
 if sonars_activated:
-    print("Sonars1")
     s_front = Sonar(6, 22)
     s_left = Sonar(5, 23)
     s_right = Sonar(16, 17)
     #s_backright = Sonar(23, 24)
     #s_backleft = Sonar(23, 24)
-    print("Sonars")
 
 
 # ------------------ Initialize IMU ------------------
@@ -75,15 +72,15 @@ if motors_running:
     #print("motor2")
 #print("Motor3")
 
-    
+
 # ---------------- Initialize Cube Sensor -----------------
 if cubesensor_active:
     ser = serial.Serial(port='/dev/ttyAMA0', baudrate = 9600, timeout=1)
-    
-    
-    
-    
-    
+
+
+
+
+'''
 # ---------------- Initialize USFS -----------------
 if usfs_active:
     MAG_RATE = 100
@@ -91,30 +88,30 @@ if usfs_active:
     GYRO_RATE = 200
     BARO_RATE = 50
     Q_RATE_DIVISOR = 3
-    
+
     usfs = USFS_Master(MAG_RATE, ACCEL_RATE, GYRO_RATE, BARO_RATE, Q_RATE_DIVISOR)
-    
+
     if not usfs.begin():
         print(usfs.getErrorString())
         exit(1)
-        
+
     usfs.checkEventStatus()
-    
+
     if usfs.gotError():
         print('ERROR: ' + usfs.getErrorString())
         exit(1)
-    
+
     if (usfs.gotQuaternion()):
-        
+
         qw, qx, qy, qz = usfs.readQuaternion()
-        
+
         yaw = math.atan2(2.0 * (qx * qy + qw * qz), qw * qw + qx * qx - qy * qy - qz * qz)
-        
+
         yaw *= 180.0 / math.pi
         yaw += 9.1
         if yaw < 0: yaw += 360.0
-        
 
+'''
 
 
 #ser = serial.Serial(port='/dev/ttyAMA0', baudrate = 9600, timeout=1)
@@ -124,14 +121,14 @@ if usfs_active:
 if camera_active:
     c = Camera(18)
 
-dist = ''
-temp = ''
-gyro = ''
-acc = ''
+dist = '0'
+temp = '0'
+gyro = '0'
+acc = '0'
 ir_status = 1
-msg = ''
+msg = '0'
 
-arm_status = ''
+arm_status = 'up'
 
 control = 'stop'
 drive = 0
@@ -144,12 +141,15 @@ distances = []
 backleft_dist = '0'
 backright_dist = '0'
 
+sensor1 = '0'
+sensor2 = '0'
+
 
 running = True
 while running:
 
     if server_online:
-        
+
         if server.disconnect_counter > 10:
             server.receiveConnection()
 
@@ -177,30 +177,18 @@ while running:
     if cubesensor_active:
         sensor1 = ser.read(1)
         sensor2 = ser.read(1)
-        
-<<<<<<< HEAD
-        print(sensor1, sensor2)
-        
-        
-        
-        
-        
+
+
+
     if usfs_active:
         pass
-
-
-
-
-
-=======
->>>>>>> abca825c24e19897306d28fe261a4342759ce725
 
     if motors_running:
         arm_status = arm.status
 
     # Compile a data string to send to the client
     msg = "sonar = " + str(distances) + ",, temp = " + str(temp) + ",, accel = " + str(acc) + \
-            ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status) + ',,arm =' + str(arm_status) + ',,cube1 =' + str(sensor1) + ',,cube2 =' + str(sensor1) 
+            ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status) + ',,arm =' + str(arm_status)
 
     #time.sleep(3)
     if server_online:
@@ -217,7 +205,6 @@ while running:
 
         if control:
             datalist = control.split(',')
-            print(datalist)
         # Wheels are turned at the same ratio as the joystick is held
         # M1 is right side wheel
         # M2 is left side
@@ -235,8 +222,9 @@ while running:
                         drive = float(data.split('=')[1])
                         m1_throttle = -drive
                         m2_throttle = -drive
-                        
+
         '''
+        #print("Controls")
         if keyboard_control:
             for data in datalist:
                 if 'forward' in data:
@@ -287,15 +275,15 @@ while running:
                         arm.openClaw()
                     elif data == 'clawclosed':
                         arm.closeClaw()
-            
-        print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
+
+        #print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
 
         if motors_running:
 
             robot.motor1.throttle = m1_throttle
             robot.motor2.throttle = m2_throttle
-            
-        
+
+
 
     msg = ""
 
