@@ -237,7 +237,7 @@ class LaneRobot():
         coordinates = (self.x-self.width/2, self.y-self.height/2, self.width, self.height)
         pygame.draw.rect(self.screen, self.color, pygame.Rect(coordinates))
 
-        pygame.draw.line(self.screen, (255, 255, 255), (0, self.height*4.4), (self.width*6, self.height*4.4), 2)
+        pygame.draw.line(self.screen, (255, 255, 255), (0, self.height*4.4), (self.width*10, self.height*4.4), 2)
         
 
     def drawBarriers(self,front, left, right, back):
