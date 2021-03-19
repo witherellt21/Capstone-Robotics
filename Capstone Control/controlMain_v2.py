@@ -18,7 +18,7 @@ from PIL import ImageFont
 server_online = False
 receiving_data = False
 pygame_running = True
-controller_connected = True
+controller_connected = False
 trigger_turn = False
 keyboard_control = False
 cubeDetection = False
@@ -34,15 +34,15 @@ grey = (200, 200, 200)
 
 # GUI Attributes
 height = 800
-width = 1400
+width = 300
 
 sim_height = height/3
-sim_width = height/3
+sim_width = width
 sim_x = 0
 sim_y = 0
 
-cockpit_height = sim_height/2
-cockpit_width = sim_width
+cockpit_height = height/3
+cockpit_width = width
 cockpit_x = sim_x
 cockpit_y = sim_y + sim_height
 
@@ -102,13 +102,13 @@ if pygame_running:
         robotX = sim_width/2
         robotY = sim_height/2
 
-        pixels_per_inch = sim_height/36
+        pixels_per_inch = sim_height/48
 
         robot_height = 10*pixels_per_inch
         robot_width =  8* pixels_per_inch
     
         robot = LaneRobot(sim_surface, robotX, robotY, robot_height, robot_width, (255, 255, 255), pixels_per_inch)
-
+    
 
     cockpit = Cockpit(cockpit_surface, cockpit_x, cockpit_y, cockpit_height, cockpit_width)
     compass = Compass(compass_surface, compass_x, compass_y, compass_height, compass_width)
@@ -116,7 +116,7 @@ if pygame_running:
         
     font_14 = pygame.font.Font('freesansbold.ttf', 14)
     font_18 = pygame.font.Font('freesansbold.ttf', 18)
-    font_24 = pygame.font.Font('freesansbold.ttf', 24) 
+    font_24 = pygame.font.Font('freesansbold.ttf', 24)
 
 
 # ---------------- Initialize Receiver/Server -----------------
@@ -134,10 +134,13 @@ accel_data = '0'
 gyro_data = '0'
 sonar_data = '0'
 front_dist = '0'
-back_dist = '0'
+backleft_dist = '0'
+backright_dist = '0'
 left_dist = '0'
 right_dist = '0'
 ir_data = 1
+
+turn_prediction = 'forward'
 
 ax = ''
 ay = ''
@@ -164,9 +167,9 @@ mag = ''
 
 # ------------------- Configure Robot --------------------
 
-camera_vert_axis = 0
-camera_horiz_axis = 0
-
+armup = True
+m1_throttle = 0
+m2_throttle = 0
 
 
 # -------------------- Begin Mainloop --------------------
@@ -362,8 +365,9 @@ while running:
         if len(sonar_total) == 4:
             front_dist = sonar_total[0].strip('[')
             right_dist = sonar_total[1]
-            back_dist = sonar_total[2]
-            left_dist = sonar_total[3].strip(']')
+            backleft_dist = sonar_total[2]
+            backright_dist = sonar_total[3]
+            left_dist = sonar_total[4].strip(']')
 
         #GET IR PROXIMITY DATA
         ir_data = r.getIR(ir_data)
@@ -404,10 +408,21 @@ while running:
             print('temp = ', temp_data)
             print('front = ', front_dist)
             print('right = ', right_dist)
-            print('back = ', back_dist)
+            print('backleft = ', backleft_dist)
+            print('backright = ', backright_dist)
             print('left = ', left_dist)
 
 
+        if float(left_dist) >= 24:
+            turn_prediction = 'left'
+        elif float(front_dist) >= 24:
+            turn_prediction = 'forward'
+        elif float(right_dist) >= 24:
+            turn_prediction = 'right'
+        elif float(backleft_dist) >= 24 and float(backright_dist) >=24:
+            turn_prediction = 'backward'
+            
+    
     if cubeDetection:
         #Code for receiving serial communication from Teensy regarding the intensity of the elctromagnetic field.
         pass
@@ -449,12 +464,24 @@ while running:
 
             front = 6
 
+            turn_prediction = 'left'
+
             robot.draw()
             robot.drawBarriers(front, 3, 6, 2)
-        
-        cockpit.drawThrottles(1, 1)
-        displayText(cockpit_surface, "M1", font_14, cockpit.width*13/60, cockpit.height/16, white, black )
-        displayText(cockpit_surface, "M2", font_14, cockpit.width*26/60, cockpit.height/16, white, black )
+            robot.drawPredictionArrow(turn_prediction)
+
+
+        cockpit.drawThrottles(m1_throttle, m2_throttle)
+        cockpit.drawIntensity(5)
+        displayText(cockpit_surface, "M1", font_14, cockpit.width*13/60, cockpit.height/25, white, black )
+        displayText(cockpit_surface, "M2", font_14, cockpit.width*26/60, cockpit.height/25, white, black )
+        displayText(cockpit_surface, "Intensity", font_14, cockpit.width*53/60, cockpit.height/25, white, black )
+
+        if armup:
+            cockpit.drawArrowArm('up')
+            #cockpit.drawArrow('up', 'arm')
+            #cockpit.drawArrow('up', 'arm')
+
 
         #orientation += 0.01
         orientation = math.pi/2
@@ -463,7 +490,6 @@ while running:
         displayText(compass_surface, "W", font_14, compass.width *7/80, compass.height/2, white, black)
         displayText(compass_surface, "E", font_14, compass.width *77/80, compass.height/2, white, black)
         displayText(compass_surface, "S", font_14, compass.width *259/500, compass.height*15/16, white, black)
-
         
         # Display message when in autonomous mode
         if control_mode == "autonomous":

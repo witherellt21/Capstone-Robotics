@@ -13,16 +13,18 @@ from armcontrol import Arm
 #from imu import IMU
 from IRsensor import IR
 from adafruit_motorkit import MotorKit
+import serial
 
 
 sonars_activated = False
 imu_activated = False
 ir_sensor_activated = False
-motors_running = True
-server_online = True
+motors_running = False
+server_online = False
 trigger_turn = False
 keyboard_control = False
-camera_active = True
+camera_active = False
+cubesensor_active = True
 
 
 # ---------------- Initialize Server -----------------
@@ -66,8 +68,11 @@ if motors_running:
     #print("motor2")
 #print("Motor3")
 
+    
+# ---------------- Initialize Cube Sensor -----------------
+ser = serial.Serial(port='/dev/ttyS0', baudrate = 9600)
 
-# ---------------- Initialize Motors -----------------
+# ---------------- Initialize Camera -----------------
 if camera_active:
     c = Camera(18)
 
@@ -113,6 +118,12 @@ while running:
     if ir_sensor_activated:
         ir_status = ir.status()   # Print status of proximity sensor
 
+    if cubesensor_active:
+        sensor1 = ser.read()
+        sensor2 = ser.read()
+
+        print(sensor1, sensor2)
+
     # Compile a data string to send to the client
     msg = "sonar = " + str(distances) + ",, temp = " + str(temp) + ",, accel = " + str(acc) + \
             ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status)
@@ -124,7 +135,7 @@ while running:
             server.receiveConnection()
         # Send sensor data to client
         server.send(msg)
-        #print('sent')
+
         time.sleep(0.03)
 
         # Receive control data from client
@@ -209,6 +220,7 @@ while running:
 
             robot.motor1.throttle = m1_throttle
             robot.motor2.throttle = m2_throttle
+            
         
 
     msg = ""
