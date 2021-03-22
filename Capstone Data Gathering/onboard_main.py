@@ -34,7 +34,6 @@ usfs_active = False
 # ---------------- Initialize Server -----------------
 if server_online:
     # Set the client to the server's IP and PORT address
-<<<<<<< HEAD
     IP = '192.168.2.2'
     PORT = 20001
     server = Server(IP, PORT)
