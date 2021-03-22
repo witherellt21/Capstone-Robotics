@@ -3,6 +3,7 @@ import time
 
 GPIO.setmode(GPIO.BCM)
 
+
 def distance(trig, echo):
     GPIO.setup(trig, GPIO.OUT)
     GPIO.setup(echo, GPIO.IN)
@@ -30,14 +31,16 @@ def distance(trig, echo):
 
     
 if __name__=='__main__':
+    GPIO.cleanup()
     while True:
-        
-        time.sleep(0.5)
-        distance1 = distance(17, 16)`
-        distance2 = distance(18, 13)
-        distance3 = distance(27, 12)
-        distance4 = distance(22, 6)
-        distance5 = distance(23, 5)
+        #front= distance(16, 17)
+        time.sleep(.1)
+        #left = distance(13, 18)
+        time.sleep(.1)
+        #right = distance(12,27)
+        time.sleep(.1)
+#         distance4 = distance(22, 6)
+#         distance5 = distance(23, 5)
     
-        print(str(distance1)+ " " +str(distance2)+ " " +str(distance3)+ " " +str(distance4)+ " " +str(distance5))
+        print(str(left) + ' ' + str(front) + ' ' + str(right))
         
