@@ -292,6 +292,9 @@ class LaneRobot():
         elif direction == 'backward':
             coordinates1, coordinates2 = drawArrow(180, self.x, self.y-height/2, 60, 30, self.x, self.y)
 
+        elif direction == 'none':
+            return
+
         rect = pygame.draw.polygon(self.screen, (255, 0, 0), coordinates2)
         triangle = pygame.draw.polygon(self.screen, (255, 0, 0), coordinates1)
 

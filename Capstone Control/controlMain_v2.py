@@ -18,7 +18,7 @@ from PIL import ImageFont
 server_online = True
 receiving_data = True
 pygame_running = True
-controller_connected = False
+controller_connected = True
 trigger_turn = False
 keyboard_control = False
 cubeDetection = False
@@ -102,7 +102,7 @@ if pygame_running:
         robotX = sim_width/2
         robotY = sim_height/2
 
-        pixels_per_inch = sim_height/48
+        pixels_per_inch = sim_height/36
 
         robot_height = 10*pixels_per_inch
         robot_width =  8* pixels_per_inch
@@ -135,7 +135,7 @@ accel_data = '0'
 gyro_data = '0'
 sonar_data = '0'
 front_dist = '0'
-backleft_dist = '0'
+backleft_dist = '20'
 backright_dist = '0'
 left_dist = '0'
 right_dist = '0'
@@ -144,7 +144,7 @@ arm_data = 'up'
 
 yaw = 0.0
 
-turn_prediction = 'forward'
+turn_prediction = 'none'
 
 ax = ''
 ay = ''
@@ -228,6 +228,9 @@ while running:
 
             message += drive_control
 
+    if trigger_turn:
+        trigger = ''
+
     
     controller_start = time.time()
     if controller_connected:
@@ -263,17 +266,17 @@ while running:
         # Control camera movements using D-pad
         if camera_vert_axis:
             if camera_vert_axis > 0:
-                print('Face camera forward')
+                #print('Face camera forward')
                 message += ",cameraforward,"
             else:
-                print('Face camera backward')
+                #print('Face camera backward')
                 message += ",camerabackward,"
         if camera_horiz_axis:
             if camera_horiz_axis > 0:
-                print('Face camera right')
+                #print('Face camera right')
                 message += ",cameraright,"
             else:
-                print('Face camera left')
+                #print('Face camera left')
                 message += ",cameraleft,"
         
         #Control arm using A and B button
@@ -300,6 +303,9 @@ while running:
             scan_axis = 0
         #time.sleep(1)
         turn_factor = 0
+
+        if y_axis < 0 and abs(y_axis) <= 0.1:
+            y_axis = 0
 
         if abs(x_axis) + abs(y_axis) > 1:
             x_hold = x_axis
@@ -367,15 +373,19 @@ while running:
         sonar_total = sonar_data.split(',')
 
         if len(sonar_total) == 5:
-            front_dist = sonar_total[0].strip('[')
-            right_dist = sonar_total[1].strip(' ')
-            backleft_dist = sonar_total[2].strip(' ')
-            backright_dist = sonar_total[3].strip(' ')
-            left_dist = sonar_total[4].strip(']')
+            if not sonar_total[0].strip('[').strip(' ') == 'None':
+                front_dist = sonar_total[0].strip('[').strip(' ')
+            if not sonar_total[1].strip(' ') == 'None':
+                right_dist = sonar_total[1].strip(' ')
+            #if not sonar_total[2].strip(' ') == 'None':
+                #backleft_dist = sonar_total[2].strip(' ')
+            if not sonar_total[3].strip(' ') == 'None':
+                backright_dist = sonar_total[3].strip(' ')
+            if not sonar_total[4].strip(']').strip(' ') == 'None':
+                left_dist = sonar_total[4].strip(']').strip(' ')
 
         #GET IR PROXIMITY DATA
         ir_data = r.getIR(ir_data)
-
 
         '''
         #GET ACCELEROMETER DATA
@@ -412,7 +422,7 @@ while running:
 
             
         #GET USFS DATA
-        yaw = r.getYaw(yaw)
+        #yaw = r.getYaw(yaw)
 
 
         #GET CUBE SENSOR DATA
@@ -439,12 +449,17 @@ while running:
             print('left = ', left_dist)
 
 
-        if left_dist != 'None' and float(left_dist) >= 24:
+        if left_dist != 'None' and float(left_dist) >= 15:
             turn_prediction = 'left'
-        elif front_dist != 'None' and float(front_dist) >= 24:
+        elif front_dist != 'None' and float(front_dist) >= 15:
             turn_prediction = 'forward'
-        elif right_dist != 'None' and float(right_dist) >= 24:
+        elif right_dist != 'None' and float(right_dist) >= 15:
             turn_prediction = 'right'
+        #elif float(backright_dist) >= 15 and float(backleft_dist) >= 15:
+        else:
+            turn_prediction = 'backward'
+
+        #if the robot receives a none, stop and get new reading
             
     
     if cubeDetection:
@@ -485,8 +500,6 @@ while running:
             #robot.displayWarnings()
         
         elif simulation == 'lanecontrol':
-
-            turn_prediction = 'left'
 
             distances = [front_dist, left_dist, right_dist, backright_dist, backleft_dist]
 
@@ -540,7 +553,7 @@ while running:
 total = 0
 for time in elapsedList:
     total += time
-
+'''
 if controller_connected:
     controller_total = 0
     for time in controllerList:
@@ -562,5 +575,5 @@ if pygame_running:
     print('Average Elapsed Time for pygame code: ', pygame_total/len(pygameList))
                           
 print('Average Elapsed Time: ', total/len(elapsedList))
-
+'''
 pygame.quit()

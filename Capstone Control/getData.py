@@ -41,10 +41,6 @@ class Receiver():
     def getSonar(self, last):
         for data in self.datalist:
             if 'sonar' in data:
-                #sonar_total = data.split('=')[1]
-                #sonar_split = sonar_total.strip('[').strip(']')
-                #print(sonar_split)
-                #print(data.split('=')[1])
                 try: return data.split('=')[1].strip()
                 except: return last
         return last
