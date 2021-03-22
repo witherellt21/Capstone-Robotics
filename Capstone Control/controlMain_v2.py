@@ -15,10 +15,10 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = False
-receiving_data = False
+server_online = True
+receiving_data = True
 pygame_running = True
-controller_connected = True
+controller_connected = False
 trigger_turn = False
 keyboard_control = False
 cubeDetection = False
@@ -123,9 +123,10 @@ if pygame_running:
 if server_online:
     # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
-    PORT = 10000
+    PORT = 20001
     r = Receiver(IP, PORT)
     r.client.connect()
+
 
 
 # ---------------- Initialize Variables -----------------
@@ -139,8 +140,9 @@ backright_dist = '0'
 left_dist = '0'
 right_dist = '0'
 ir_data = 1
-usfs_data = '0'
 arm_data = 'up'
+
+yaw = 0.0
 
 turn_prediction = 'forward'
 
@@ -169,7 +171,7 @@ mag = ''
 
 # ------------------- Configure Robot --------------------
 
-arm_status == 'up'
+arm_status = 'up'
 m1_throttle = 0
 m2_throttle = 0
 
@@ -355,14 +357,8 @@ while running:
     server_start = time.time()
 
     if server_online and receiving_data:
-
         r.receive_msg()
-        time.sleep(0.03)
 
-        serverList.append(time.time() - server_start)
-
-        data = r.datalist
-        
         #GET TEMPERATURE DATA
         #temp_data = r.getTemp(temp_data)
 
@@ -372,14 +368,16 @@ while running:
 
         if len(sonar_total) == 5:
             front_dist = sonar_total[0].strip('[')
-            right_dist = sonar_total[1]
-            backleft_dist = sonar_total[2]
-            backright_dist = sonar_total[3]
+            right_dist = sonar_total[1].strip(' ')
+            backleft_dist = sonar_total[2].strip(' ')
+            backright_dist = sonar_total[3].strip(' ')
             left_dist = sonar_total[4].strip(']')
 
         #GET IR PROXIMITY DATA
         ir_data = r.getIR(ir_data)
 
+
+        '''
         #GET ACCELEROMETER DATA
         accel_data = r.getAccel(accel_data)
         a_datalist = accel_data.split(',')
@@ -388,7 +386,7 @@ while running:
             ay = a_datalist[1]
             az = a_datalist[2].strip(']')
 
-        '''
+        
         #GET GYROSCOPE DATA
         gyro_data = r.getGyro(gyro_data)
         g_datalist = gyro_data.split(',')
@@ -411,11 +409,11 @@ while running:
 
         elif arm_data == 'down':
             arm_status = 'down'
-            
+
             
         #GET USFS DATA
-        #usfs_data = r.getUSFS(usfs_data)
-        #usfs_datalist = usfs_data.split(',')
+        yaw = r.getYaw(yaw)
+
 
         #GET CUBE SENSOR DATA
         #emf_data = r.getEMF(emf_data)
@@ -441,14 +439,12 @@ while running:
             print('left = ', left_dist)
 
 
-        if float(left_dist) >= 24:
+        if left_dist != 'None' and float(left_dist) >= 24:
             turn_prediction = 'left'
-        elif float(front_dist) >= 24:
+        elif front_dist != 'None' and float(front_dist) >= 24:
             turn_prediction = 'forward'
-        elif float(right_dist) >= 24:
+        elif right_dist != 'None' and float(right_dist) >= 24:
             turn_prediction = 'right'
-        elif float(backleft_dist) >= 24 and float(backright_dist) >=24:
-            turn_prediction = 'backward'
             
     
     if cubeDetection:
@@ -490,12 +486,12 @@ while running:
         
         elif simulation == 'lanecontrol':
 
-            front = 6
-
             turn_prediction = 'left'
 
+            distances = [front_dist, left_dist, right_dist, backright_dist, backleft_dist]
+
             robot.draw()
-            robot.drawBarriers(front, 3, 6, 2)
+            robot.drawBarriers(front_dist, left_dist, right_dist, backright_dist, backleft_dist)
             robot.drawPredictionArrow(turn_prediction)
 
 
@@ -515,8 +511,7 @@ while running:
         displayText(cockpit_surface, "Arm", font_14, cockpit.width/6, cockpit.height*28/40, white, black)
         displayText(cockpit_surface, "Auto?", font_14, cockpit.width*22.5/50, cockpit.height*28/40, white, black)
 
-        orientation = math.pi/2
-        compass.drawCompass(orientation)
+        compass.drawCompass(float(yaw))
         displayText(compass_surface, "N", font_14, compass.width *262/500, compass.height/16, white, black)
         displayText(compass_surface, "W", font_14, compass.width *7/80, compass.height/2, white, black)
         displayText(compass_surface, "E", font_14, compass.width *77/80, compass.height/2, white, black)

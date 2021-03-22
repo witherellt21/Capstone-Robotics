@@ -77,6 +77,10 @@ def main():
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
+<<<<<<< HEAD
 
 if __name__ == '__main__':
     main()
+=======
+'''
+>>>>>>> bb56b66b7abe3eaf5e0806db84450c7e0be97b53
