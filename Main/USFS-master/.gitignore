@@ -1,0 +1,10 @@
+*.pyc
+*.swp
+*.bak
+*.o
+*.so
+extras/*/MasterTest
+extras/python/usfs/__pycache__/
+extras/python/USFS.egg-info/
+extras/python/build/
+extras/python/dist/
