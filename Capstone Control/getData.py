@@ -68,16 +68,6 @@ class Receiver():
         #if len(self.datalist) > 0:
             #return self.datalist[0].strip()
 
-    def getUSFS(self, last):
-        for data in self.datalist:
-            if 'accel' in data:
-                return data.split('=')[1].strip()
-                #except: return last
-        return last
-
-        #if len(self.datalist) > 0:
-            #return self.datalist[0].strip()
-
     def getEMF(self, last):
         for data in self.datalist:
             if 'emf' in data:
@@ -89,12 +79,19 @@ class Receiver():
         #if len(self.datalist) > 0:
             #return self.datalist[0].strip()
 
-    def getarm(self, last):
+    def getArm(self, last):
         for data in self.datalist:
             if 'arm' in data:
                 return data.split('=')[1].strip()
                 #except: return last
         return last
+
+    def getYaw(self, last):
+        for data in self.datalist:
+            if 'yaw' in data:
+                return data.split('=')[1].strip()
+        return last
+        
     '''
     def getIMU(self, last):
         for data in self.datalist:

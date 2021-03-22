@@ -30,7 +30,7 @@ cubesensor_active = False
 # ---------------- Initialize Server -----------------
 if server_online:
     # Set the client to the server's IP and PORT address
-    IP = '192.168.2.2'
+    IP = '172.20.10.3'
     PORT = 10000
     server = Server(IP, PORT)
 
