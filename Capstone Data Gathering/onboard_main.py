@@ -28,7 +28,7 @@ keyboard_control = False
 camera_active = False
 cubesensor_active = False
 usfs_active = False
-arm_status = True
+arm_active = True
 
 
 
