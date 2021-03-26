@@ -24,7 +24,7 @@ class Sonar():
         GPIO.setup(self.trigger, GPIO.OUT)
         GPIO.setup(self.echo, GPIO.IN)
 
-    def distance(self):
+    def distance(self, last_value):
         # set Trigger to HIGH
         GPIO.output(self.trigger, True)
         # set Trigger after 0.01ms to LOW
@@ -37,8 +37,8 @@ class Sonar():
         # save StartTime
         while GPIO.input(self.echo) == 0:
             #print('stuck in here')
-            if time.time()- start >=0.5:
-                return
+            if time.time()- start >=0.1:
+                return last_value
             StartTime = time.time()
         
         
@@ -77,10 +77,7 @@ def main():
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
-<<<<<<< HEAD
 
 if __name__ == '__main__':
     main()
-=======
-'''
->>>>>>> bb56b66b7abe3eaf5e0806db84450c7e0be97b53
+

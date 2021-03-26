@@ -18,16 +18,16 @@ from usfs import USFS_Master
 import math
 
 
-sonars_activated = True
+sonars_activated = False
 imu_activated = False
 ir_sensor_activated = False
 motors_running = False
-server_online = True
+server_online = False
 trigger_turn = False
 keyboard_control = False
 camera_active = False
 cubesensor_active = False
-usfs_active = False
+usfs_active = True
 
 
 
@@ -49,10 +49,10 @@ if server_online:
 # ----------------- Initialize Sonar -----------------
 if sonars_activated:
     s_backright = Sonar(16, 17)
-    s_left = Sonar(5, 23)
+    s_left = Sonar(13, 18)
     s_right = Sonar(12, 27)
     s_front = Sonar(6, 22)
-    s_backleft = Sonar(13, 18)
+    s_backleft = Sonar(5, 23)
 
 
 
@@ -103,9 +103,9 @@ if usfs_active:
     if usfs.gotError():
         print('ERROR: ' + usfs.getErrorString())
         exit(1)
-        
+
 def getYaw():
-    
+
     if (usfs.gotQuaternion()):
 
             qw, qx, qy, qz = usfs.readQuaternion()
@@ -115,9 +115,9 @@ def getYaw():
             yaw *= 180.0 / math.pi
             yaw += 9.1
             if yaw < 0: yaw += 360.0
-            
+
             return yaw
-        
+
 
 
 
@@ -143,7 +143,7 @@ turn_status = "None"
 m1_throttle = 0
 m2_throttle = 0
 
-distances = []
+distances = [1000, 1000, 1000, 1000, 1000]
 front_dist = '0'
 backleft_dist = '0'
 backright_dist = '0'
@@ -161,23 +161,26 @@ while running:
     if server_online:
 
         if server.disconnect_counter > 10:
+            arm.kit.stepper2.release()
             server.receiveConnection()
 
             print('Connection Received')
 
     if sonars_activated:
-        front_dist = s_front.distance()   # Get sonars distance data
-        left_dist = s_left.distance()
-        right_dist = s_right.distance()
-        backleft_dist = s_backleft.distance()
-        backright_dist = s_backright.distance()
+        front_dist = s_front.distance(distances[0])   # Get sonars distance data
+        left_dist = s_left.distance(distances[4])
+        right_dist = s_right.distance(distances[1])
+        backleft_dist = s_backleft.distance(distances[2])
+        backright_dist = s_backright.distance(distances[3])
 
         distances = [front_dist, right_dist, backleft_dist, backright_dist, left_dist]
         
         for i in range(len(distances)):
             if distances[i] != None:
                 distances[i] = round(float(distances[i]),2)
-
+        print(distances)
+        
+        
     if imu_activated:
         ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
         if ag_data_ready:
@@ -188,7 +191,7 @@ while running:
     if cubesensor_active:
         sensor1 = ser.read()
         int_val = int.from_bytes(sensor1, "little", signed = False)
-        print(int_val)
+        #print(int_val)
 
 
 
@@ -202,7 +205,6 @@ while running:
     # Compile a data string to send to the client
     msg = "sonar = " + str(distances) + ",, temp = " + str(temp) + ",, accel = " + str(acc) + \
             ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status) + ',,arm =' + str(arm_status) + ',,yaw =' + str(yaw)
-    
 
 
     #time.sleep(3)
@@ -211,6 +213,7 @@ while running:
         if server.disconnect_counter > 0:
             server.receiveConnection()
         # Send sensor data to client
+
         server.send(msg)
 
         time.sleep(0.03)

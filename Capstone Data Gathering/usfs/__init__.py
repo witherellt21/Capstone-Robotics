@@ -379,7 +379,7 @@ class USFS(object):
         STAT = self.readRegister(self.ParamAcknowledge) #Check the parameter acknowledge register and loop until the result matches parameter request byte
         while(not (STAT==0xCA)):
             STAT = self.readRegister(self.ParamAcknowledge)
-        
+        smbus2
         self.writeRegister(self.ParamRequest, 0x00) #Parameter request = 0 to end parameter transfer process
         self.writeRegister(self.AlgorithmControl, 0x00) # Re-start algorithm
 
