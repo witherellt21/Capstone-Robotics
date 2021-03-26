@@ -22,12 +22,13 @@ sonars_activated = False
 imu_activated = False
 ir_sensor_activated = False
 motors_running = False
-server_online = False
+server_online = True
 trigger_turn = False
 keyboard_control = False
 camera_active = False
 cubesensor_active = False
-usfs_active = True
+usfs_active = False
+arm_status = True
 
 
 
@@ -73,6 +74,7 @@ if ir_sensor_activated:
 #print("motor1")
 if motors_running:
     robot = MotorKit()
+if arm_active: 
     arm = Arm(0x61)
 
 
@@ -273,26 +275,32 @@ while running:
                             m2_throttle = round(float(data.split('=')[1]), 2)
                         except:
                             pass
-                    elif data == 'cameraforward':
-                        c.FaceForward()
-                    elif data == 'camerabackward':
-                        c.FaceBackward()
-                    elif data == 'cameraleft':
-                        c.FaceLeft()
-                    elif data == 'cameraright':
-                        c.FaceRight()
-                    elif data == 'armup':
-                        if not arm.status == 'up':
-                            arm.armUp()
-                            arm.status = 'up'
-                    elif data == 'armdown':
-                        if not arm.status == 'down':
-                            arm.armDown()
-                            arm.status = 'down'
-                    elif data == 'clawopen':
-                        arm.openClaw()
-                    elif data == 'clawclosed':
-                        arm.closeClaw()
+                        
+                    if camera_active:
+                        
+                        if data == 'cameraforward':
+                            c.FaceForward()
+                        elif data == 'camerabackward':
+                            c.FaceBackward()
+                        elif data == 'cameraleft':
+                            c.FaceLeft()
+                        elif data == 'cameraright':
+                            c.FaceRight()
+                            
+                    if arm_active:
+                    
+                        if data == 'armup':
+                            if not arm.status == 'up':
+                                arm.armUp()
+                                arm.status = 'up'
+                        elif data == 'armdown':
+                            if not arm.status == 'down':
+                                arm.armDown()
+                                arm.status = 'down'
+                        elif data == 'clawopen':
+                            arm.openClaw()
+                        elif data == 'clawclosed':
+                            arm.closeClaw()
 
         #print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
 
