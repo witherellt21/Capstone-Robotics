@@ -13,6 +13,7 @@ class Sonar():
 
     def __init__(self, trigger_pin, echo_pin):
         #GPIO Mode (BOARD / BCM)
+#         GPIO.cleanup()
         GPIO.setmode(GPIO.BCM)
 
         #set GPIO Pins
@@ -23,7 +24,7 @@ class Sonar():
         GPIO.setup(self.trigger, GPIO.OUT)
         GPIO.setup(self.echo, GPIO.IN)
 
-    def distance(self):
+    def distance(self, last_value):
         # set Trigger to HIGH
         GPIO.output(self.trigger, True)
 
@@ -33,9 +34,13 @@ class Sonar():
 
         StartTime = time.time()
         StopTime = time.time()
+        
+        start_time = time.time()
 
         # save StartTime
         while GPIO.input(self.echo) == 0:
+#             if time.time() - start_time >= 0.2:
+#                 return last_value
             StartTime = time.time()
 
         # save time of arrival

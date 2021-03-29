@@ -9,7 +9,7 @@ from sonar import Sonar
 import pygame
 import time
 from CameraServo import Camera
-from armcontrol import Arm
+from armcontrol import Arm  # NEEED TO DOWNLOAD BOARD DEPOENDENCY
 #from imu import IMU
 from IRsensor import IR
 from adafruit_motorkit import MotorKit
@@ -22,21 +22,21 @@ sonars_activated = True
 imu_activated = False
 ir_sensor_activated = False
 motors_running = True
-server_online = True
+server_online = False
 trigger_turn = False
 keyboard_control = False
-<<<<<<< HEAD
 camera_active = False
 cubesensor_active = False
-usfs_active = True
-camera_active = True
+usfs_active = False
+camera_active = False
 cubesensor_active = False
 
+autonomous = True
 
 # ---------------- Initialize Server -----------------
 if server_online:
     # Set the client to the server's IP and PORT address
-    IP = '192.168.2.2'
+    IP = '172.20.10.2'
     PORT = 10000
     server = Server(IP, PORT)
 
@@ -49,12 +49,22 @@ if server_online:
 # ----------------- Initialize Sonar -----------------
 if sonars_activated:
     print("Sonars1")
-    s_front = Sonar(6, 22)
-    s_left = Sonar(5, 23)
-    s_right = Sonar(16, 17)
+    
+    s_front = Sonar(6, 18)
+    s_left = Sonar(5, 17)
+    s_right = Sonar(12, 27)
     #s_backright = Sonar(23, 24)
-    #s_backleft = Sonar(23, 24)
+    s_backleft = Sonar(16, 23)
     print("Sonars")
+    
+    
+def drive(turn):
+    #print(turn)
+    
+    if turn == 'left':
+        pass
+        
+    
 
 
 # ------------------ Initialize IMU ------------------
@@ -82,8 +92,6 @@ if cubesensor_active:
     
     
     
-    
-    
 # ---------------- Initialize USFS -----------------
 if usfs_active:
     MAG_RATE = 100
@@ -104,15 +112,20 @@ if usfs_active:
         print('ERROR: ' + usfs.getErrorString())
         exit(1)
     
-    if (usfs.gotQuaternion()):
+    def getYaw(last_value):
+        if (usfs.gotQuaternion()):
+            
+            qw, qx, qy, qz = usfs.readQuaternion()
+            
+            yaw = math.atan2(2.0 * (qx * qy + qw * qz), qw * qw + qx * qx - qy * qy - qz * qz)
+            
+            yaw *= 180.0 / math.pi
+            yaw += 9.1
+            if yaw < 0: yaw += 360.0
+            
+            return yaw
         
-        qw, qx, qy, qz = usfs.readQuaternion()
-        
-        yaw = math.atan2(2.0 * (qx * qy + qw * qz), qw * qw + qx * qx - qy * qy - qz * qz)
-        
-        yaw *= 180.0 / math.pi
-        yaw += 9.1
-        if yaw < 0: yaw += 360.0
+        return last_value
         
 
 
@@ -134,16 +147,20 @@ msg = ''
 arm_status = ''
 
 control = 'stop'
-drive = 0
 turn_status = "None"
 
 m1_throttle = 0
 m2_throttle = 0
 
-distances = []
+distances = [1000.0, 1000.0, 1000.0, 1000.0, 1000.0]
 backleft_dist = '0'
 backright_dist = '0'
 
+
+turn_prediction = ''
+
+sensor1 = '0'
+sensor2 = '0'
 
 running = True
 while running:
@@ -156,16 +173,17 @@ while running:
             print('Connection Received')
 
     if sonars_activated:
-        front_dist = round(s_front.distance(), 2)   # Get sonars distance data
-        left_dist = round(s_left.distance(), 2)
-        right_dist = round(s_right.distance(), 2)
-        #backleft_dist = round(s_backleft.distance(), 2)
-        #backright_dist = round(s_backright.distance(), 2)
+        front_dist = round(s_front.distance(distances[0]), 2)   # Get sonars distance data
+        left_dist = round(s_left.distance(distances[4]), 2)
+        right_dist = round(s_right.distance(distances[1]), 2)
+        backleft_dist = round(s_backleft.distance(distances[2]), 2)
+        #backright_dist = round(s_backright.distance(distances[3]), 2)
         #if front_dist <= 6:
             #if motors_running:
                 #control = 'stop'
 
         distances = [front_dist, right_dist, backleft_dist, backright_dist, left_dist]
+        #print(distances)
 
     if imu_activated:
         ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
@@ -177,23 +195,13 @@ while running:
     if cubesensor_active:
         sensor1 = ser.read(1)
         sensor2 = ser.read(1)
-        
-<<<<<<< HEAD
         print(sensor1, sensor2)
-        
-        
-        
+    
         
         
     if usfs_active:
-        pass
+        yaw = getYaw(yaw)
 
-
-
-
-
-=======
->>>>>>> abca825c24e19897306d28fe261a4342759ce725
 
     if motors_running:
         arm_status = arm.status
@@ -201,7 +209,21 @@ while running:
     # Compile a data string to send to the client
     msg = "sonar = " + str(distances) + ",, temp = " + str(temp) + ",, accel = " + str(acc) + \
             ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status) + ',,arm =' + str(arm_status) + ',,cube1 =' + str(sensor1) + ',,cube2 =' + str(sensor1) 
-
+    
+    if autonomous:
+        
+        if sonars_activated:
+            if float(left_dist) >= 24:
+                turn_prediction = 'left'
+            elif float(front_dist) >= 24:
+                turn_prediction = 'forward'
+            elif float(right_dist) >= 24:
+                turn_prediction = 'right'
+            else:
+                turn_prediction = 'backward'
+        
+        m1_throttle, m2_throttle = drive(turn_prediction)
+            
     #time.sleep(3)
     if server_online:
         # If client disconnects from server, reconnect
@@ -217,7 +239,6 @@ while running:
 
         if control:
             datalist = control.split(',')
-            print(datalist)
         # Wheels are turned at the same ratio as the joystick is held
         # M1 is right side wheel
         # M2 is left side
@@ -236,7 +257,7 @@ while running:
                         m1_throttle = -drive
                         m2_throttle = -drive
                         
-        '''
+        
         if keyboard_control:
             for data in datalist:
                 if 'forward' in data:
@@ -254,9 +275,10 @@ while running:
                 if 'none' in data:
                     m1_throttle = None
                     m2_throttle = None
-        else:
-            if datalist:
-                for data in datalist:
+        '''
+        if datalist:
+            for data in datalist:
+                if not autonomous:
                     if 'm1' in data:
                         try:
                             m1_throttle = round(float(data.split('=')[1]), 2)
@@ -267,33 +289,33 @@ while running:
                             m2_throttle = round(float(data.split('=')[1]), 2)
                         except:
                             pass
-                    elif data == 'cameraforward':
-                        c.FaceForward()
-                    elif data == 'camerabackward':
-                        c.FaceBackward()
-                    elif data == 'cameraleft':
-                        c.FaceLeft()
-                    elif data == 'cameraright':
-                        c.FaceRight()
-                    elif data == 'armup':
-                        if not arm.status == 'up':
-                            arm.armUp()
-                            arm.status = 'up'
-                    elif data == 'armdown':
-                        if not arm.status == 'down':
-                            arm.armDown()
-                            arm.status = 'down'
-                    elif data == 'clawopen':
-                        arm.openClaw()
-                    elif data == 'clawclosed':
-                        arm.closeClaw()
+                elif data == 'cameraforward':
+                    c.FaceForward()
+                elif data == 'camerabackward':
+                    c.FaceBackward()
+                elif data == 'cameraleft':
+                    c.FaceLeft()
+                elif data == 'cameraright':
+                    c.FaceRight()
+                elif data == 'armup':
+                    if not arm.status == 'up':
+                        arm.armUp()
+                        arm.status = 'up'
+                elif data == 'armdown':
+                    if not arm.status == 'down':
+                        arm.armDown()
+                        arm.status = 'down'
+                elif data == 'clawopen':
+                    arm.openClaw()
+                elif data == 'clawclosed':
+                    arm.closeClaw()
             
         print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
 
         if motors_running:
 
-            robot.motor1.throttle = m1_throttle
-            robot.motor2.throttle = m2_throttle
+            robot.motor3.throttle = m1_throttle
+            robot.motor4.throttle = m2_throttle
             
         
 
