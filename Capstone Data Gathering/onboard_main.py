@@ -6,7 +6,7 @@ Description: Main loop for robot to send and receive data.
 
 from server import Server
 from sonar import Sonar
-import pygame
+#import pygame
 import time
 from CameraServo import Camera
 from armcontrol import Arm  # NEEED TO DOWNLOAD BOARD DEPOENDENCY
@@ -18,11 +18,13 @@ from usfs import USFS_Master
 import math
 
 
-sonars_activated = True
+sonars_activated = False
 imu_activated = False
 ir_sensor_activated = False
 motors_running = True
 server_online = False
+motors_running = False
+server_online = True
 trigger_turn = False
 keyboard_control = False
 camera_active = False
@@ -31,13 +33,15 @@ usfs_active = False
 camera_active = False
 cubesensor_active = False
 
+arm_active = True
+
 autonomous = True
 
 # ---------------- Initialize Server -----------------
 if server_online:
     # Set the client to the server's IP and PORT address
-    IP = '172.20.10.2'
-    PORT = 10000
+    IP = '192.168.2.2'
+    PORT = 20001
     server = Server(IP, PORT)
 
     server.start()
@@ -46,16 +50,16 @@ if server_online:
     print('Connection Received')
 
 
+
+
 # ----------------- Initialize Sonar -----------------
 if sonars_activated:
-    print("Sonars1")
     
     s_front = Sonar(6, 18)
     s_left = Sonar(5, 17)
     s_right = Sonar(12, 27)
     #s_backright = Sonar(23, 24)
     s_backleft = Sonar(16, 23)
-    print("Sonars")
     
     
 def drive(turn):
@@ -64,7 +68,6 @@ def drive(turn):
     if turn == 'left':
         pass
         
-    
 
 
 # ------------------ Initialize IMU ------------------
@@ -72,26 +75,28 @@ if imu_activated:
     imu = IMU()
 
 
+
 # ------------------ Initialize IR -------------------
 if ir_sensor_activated:
-    ir = IR(17)
+    #ir = IR(17)
+    pass
+
 
 
 # ---------------- Initialize Motors -----------------
 #print("motor1")
 if motors_running:
     robot = MotorKit()
+if arm_active: 
     arm = Arm(0x61)
-    #print("motor2")
-#print("Motor3")
 
-    
+
+
 # ---------------- Initialize Cube Sensor -----------------
 if cubesensor_active:
-    ser = serial.Serial(port='/dev/ttyAMA0', baudrate = 9600, timeout=1)
-    
-    
-    
+    ser = serial.Serial(port='/dev/ttyS0', baudrate = 9600, parity = serial.PARITY_NONE, stopbits = serial.STOPBITS_ONE, bytesize = serial.EIGHTBITS, timeout=1)
+
+
 # ---------------- Initialize USFS -----------------
 if usfs_active:
     MAG_RATE = 100
@@ -99,15 +104,15 @@ if usfs_active:
     GYRO_RATE = 200
     BARO_RATE = 50
     Q_RATE_DIVISOR = 3
-    
+
     usfs = USFS_Master(MAG_RATE, ACCEL_RATE, GYRO_RATE, BARO_RATE, Q_RATE_DIVISOR)
-    
+
     if not usfs.begin():
         print(usfs.getErrorString())
         exit(1)
-        
+
     usfs.checkEventStatus()
-    
+
     if usfs.gotError():
         print('ERROR: ' + usfs.getErrorString())
         exit(1)
@@ -128,23 +133,20 @@ if usfs_active:
         return last_value
         
 
-
-
-#ser = serial.Serial(port='/dev/ttyAMA0', baudrate = 9600, timeout=1)
-
-
 # ---------------- Initialize Camera -----------------
 if camera_active:
-    c = Camera(18)
+    c = Camera(4)
 
-dist = ''
-temp = ''
-gyro = ''
-acc = ''
+dist = '0'
+temp = '0'
+gyro = '0'
+acc = '0'
 ir_status = 1
-msg = ''
+msg = '0'
 
-arm_status = ''
+yaw = '0'
+
+arm_status = 'up'
 
 control = 'stop'
 turn_status = "None"
@@ -152,9 +154,18 @@ turn_status = "None"
 m1_throttle = 0
 m2_throttle = 0
 
+
 distances = [1000.0, 1000.0, 1000.0, 1000.0, 1000.0]
+
+front_dist = '0'
 backleft_dist = '0'
 backright_dist = '0'
+left_dist = '0'
+right_dist = '0'
+
+
+#sensor1 = '0'
+#sensor2 = '0'
 
 
 turn_prediction = ''
@@ -166,8 +177,9 @@ running = True
 while running:
 
     if server_online:
-        
+
         if server.disconnect_counter > 10:
+            arm.kit.stepper2.release()
             server.receiveConnection()
 
             print('Connection Received')
@@ -185,6 +197,20 @@ while running:
         distances = [front_dist, right_dist, backleft_dist, backright_dist, left_dist]
         #print(distances)
 
+        front_dist = s_front.distance(distances[0])   # Get sonars distance data
+        left_dist = s_left.distance(distances[4])
+        right_dist = s_right.distance(distances[1])
+        backleft_dist = s_backleft.distance(distances[2])
+        backright_dist = s_backright.distance(distances[3])
+
+        distances = [front_dist, right_dist, backleft_dist, backright_dist, left_dist]
+        
+        for i in range(len(distances)):
+            if distances[i] != None:
+                distances[i] = round(float(distances[i]),2)
+        print(distances)
+        
+        
     if imu_activated:
         ag_data_ready = imu.driver.read_ag_status().accelerometer_data_available
         if ag_data_ready:
@@ -201,6 +227,16 @@ while running:
         
     if usfs_active:
         yaw = getYaw(yaw)
+
+
+        sensor1 = ser.read()
+        int_val = int.from_bytes(sensor1, "little", signed = False)
+        #print(int_val)
+
+
+
+    if usfs_active:
+        yaw = getYaw()
 
 
     if motors_running:
@@ -224,12 +260,14 @@ while running:
         
         m1_throttle, m2_throttle = drive(turn_prediction)
             
+
     #time.sleep(3)
     if server_online:
         # If client disconnects from server, reconnect
         if server.disconnect_counter > 0:
             server.receiveConnection()
         # Send sensor data to client
+
         server.send(msg)
 
         time.sleep(0.03)
@@ -256,8 +294,9 @@ while running:
                         drive = float(data.split('=')[1])
                         m1_throttle = -drive
                         m2_throttle = -drive
-                        
+
         
+        #print("Controls")
         if keyboard_control:
             for data in datalist:
                 if 'forward' in data:
@@ -316,8 +355,7 @@ while running:
 
             robot.motor3.throttle = m1_throttle
             robot.motor4.throttle = m2_throttle
-            
-        
+
 
     msg = ""
 

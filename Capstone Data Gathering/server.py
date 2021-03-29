@@ -24,13 +24,6 @@ class Server():
         print('Connected by', self.addr)
 
     def send(self, string):
-        data = self.conn.recv(1024)
-        msg = data.decode("utf-8")
-        if msg:
-            return msg
-        else:
-            self.disconnect_counter += 1
-        print(self.disconnect_counter)
         self.conn.send( bytes( string, "utf-8"))
 
     def receive(self):

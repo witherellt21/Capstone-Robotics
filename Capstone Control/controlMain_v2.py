@@ -15,8 +15,8 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = False
-receiving_data = False
+server_online = True
+receiving_data = True
 pygame_running = True
 controller_connected = True
 trigger_turn = False
@@ -102,7 +102,7 @@ if pygame_running:
         robotX = sim_width/2
         robotY = sim_height/2
 
-        pixels_per_inch = sim_height/48
+        pixels_per_inch = sim_height/36
 
         robot_height = 10*pixels_per_inch
         robot_width =  8* pixels_per_inch
@@ -123,9 +123,10 @@ if pygame_running:
 if server_online:
     # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
-    PORT = 10000
+    PORT = 20001
     r = Receiver(IP, PORT)
     r.client.connect()
+
 
 
 # ---------------- Initialize Variables -----------------
@@ -134,15 +135,16 @@ accel_data = '0'
 gyro_data = '0'
 sonar_data = '0'
 front_dist = '0'
-backleft_dist = '0'
+backleft_dist = '20'
 backright_dist = '0'
 left_dist = '0'
 right_dist = '0'
 ir_data = 1
-usfs_data = '0'
 arm_data = 'up'
 
-turn_prediction = 'forward'
+yaw = 0.0
+
+turn_prediction = 'none'
 
 ax = ''
 ay = ''
@@ -169,7 +171,7 @@ mag = ''
 
 # ------------------- Configure Robot --------------------
 
-arm_status == 'up'
+arm_status = 'up'
 m1_throttle = 0
 m2_throttle = 0
 
@@ -226,6 +228,9 @@ while running:
 
             message += drive_control
 
+    if trigger_turn:
+        trigger = ''
+
     
     controller_start = time.time()
     if controller_connected:
@@ -261,17 +266,17 @@ while running:
         # Control camera movements using D-pad
         if camera_vert_axis:
             if camera_vert_axis > 0:
-                print('Face camera forward')
+                #print('Face camera forward')
                 message += ",cameraforward,"
             else:
-                print('Face camera backward')
+                #print('Face camera backward')
                 message += ",camerabackward,"
         if camera_horiz_axis:
             if camera_horiz_axis > 0:
-                print('Face camera right')
+                #print('Face camera right')
                 message += ",cameraright,"
             else:
-                print('Face camera left')
+                #print('Face camera left')
                 message += ",cameraleft,"
         
         #Control arm using A and B button
@@ -298,6 +303,9 @@ while running:
             scan_axis = 0
         #time.sleep(1)
         turn_factor = 0
+
+        if y_axis < 0 and abs(y_axis) <= 0.1:
+            y_axis = 0
 
         if abs(x_axis) + abs(y_axis) > 1:
             x_hold = x_axis
@@ -355,14 +363,8 @@ while running:
     server_start = time.time()
 
     if server_online and receiving_data:
-
         r.receive_msg()
-        time.sleep(0.03)
 
-        serverList.append(time.time() - server_start)
-
-        data = r.datalist
-        
         #GET TEMPERATURE DATA
         #temp_data = r.getTemp(temp_data)
 
@@ -371,15 +373,21 @@ while running:
         sonar_total = sonar_data.split(',')
 
         if len(sonar_total) == 5:
-            front_dist = sonar_total[0].strip('[')
-            right_dist = sonar_total[1]
-            backleft_dist = sonar_total[2]
-            backright_dist = sonar_total[3]
-            left_dist = sonar_total[4].strip(']')
+            if not sonar_total[0].strip('[').strip(' ') == 'None':
+                front_dist = sonar_total[0].strip('[').strip(' ')
+            if not sonar_total[1].strip(' ') == 'None':
+                right_dist = sonar_total[1].strip(' ')
+            #if not sonar_total[2].strip(' ') == 'None':
+                #backleft_dist = sonar_total[2].strip(' ')
+            if not sonar_total[3].strip(' ') == 'None':
+                backright_dist = sonar_total[3].strip(' ')
+            if not sonar_total[4].strip(']').strip(' ') == 'None':
+                left_dist = sonar_total[4].strip(']').strip(' ')
 
         #GET IR PROXIMITY DATA
         ir_data = r.getIR(ir_data)
 
+        '''
         #GET ACCELEROMETER DATA
         accel_data = r.getAccel(accel_data)
         a_datalist = accel_data.split(',')
@@ -388,7 +396,7 @@ while running:
             ay = a_datalist[1]
             az = a_datalist[2].strip(']')
 
-        '''
+        
         #GET GYROSCOPE DATA
         gyro_data = r.getGyro(gyro_data)
         g_datalist = gyro_data.split(',')
@@ -411,11 +419,11 @@ while running:
 
         elif arm_data == 'down':
             arm_status = 'down'
-            
+
             
         #GET USFS DATA
-        #usfs_data = r.getUSFS(usfs_data)
-        #usfs_datalist = usfs_data.split(',')
+        #yaw = r.getYaw(yaw)
+
 
         #GET CUBE SENSOR DATA
         #emf_data = r.getEMF(emf_data)
@@ -441,14 +449,17 @@ while running:
             print('left = ', left_dist)
 
 
-        if float(left_dist) >= 24:
+        if left_dist != 'None' and float(left_dist) >= 15:
             turn_prediction = 'left'
-        elif float(front_dist) >= 24:
+        elif front_dist != 'None' and float(front_dist) >= 15:
             turn_prediction = 'forward'
-        elif float(right_dist) >= 24:
+        elif right_dist != 'None' and float(right_dist) >= 15:
             turn_prediction = 'right'
-        elif float(backleft_dist) >= 24 and float(backright_dist) >=24:
+        #elif float(backright_dist) >= 15 and float(backleft_dist) >= 15:
+        else:
             turn_prediction = 'backward'
+
+        #if the robot receives a none, stop and get new reading
             
     
     if cubeDetection:
@@ -490,12 +501,10 @@ while running:
         
         elif simulation == 'lanecontrol':
 
-            front = 6
-
-            turn_prediction = 'left'
+            distances = [front_dist, left_dist, right_dist, backright_dist, backleft_dist]
 
             robot.draw()
-            robot.drawBarriers(front, 3, 6, 2)
+            robot.drawBarriers(front_dist, left_dist, right_dist, backright_dist, backleft_dist)
             robot.drawPredictionArrow(turn_prediction)
 
 
@@ -515,8 +524,7 @@ while running:
         displayText(cockpit_surface, "Arm", font_14, cockpit.width/6, cockpit.height*28/40, white, black)
         displayText(cockpit_surface, "Auto?", font_14, cockpit.width*22.5/50, cockpit.height*28/40, white, black)
 
-        orientation = math.pi/2
-        compass.drawCompass(orientation)
+        compass.drawCompass(float(yaw))
         displayText(compass_surface, "N", font_14, compass.width *262/500, compass.height/16, white, black)
         displayText(compass_surface, "W", font_14, compass.width *7/80, compass.height/2, white, black)
         displayText(compass_surface, "E", font_14, compass.width *77/80, compass.height/2, white, black)
@@ -545,7 +553,7 @@ while running:
 total = 0
 for time in elapsedList:
     total += time
-
+'''
 if controller_connected:
     controller_total = 0
     for time in controllerList:
@@ -567,5 +575,5 @@ if pygame_running:
     print('Average Elapsed Time for pygame code: ', pygame_total/len(pygameList))
                           
 print('Average Elapsed Time: ', total/len(elapsedList))
-
+'''
 pygame.quit()

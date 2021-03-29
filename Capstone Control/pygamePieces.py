@@ -240,25 +240,40 @@ class LaneRobot():
         pygame.draw.line(self.screen, (255, 255, 255), (0, self.height*4.4), (self.width*10, self.height*4.4), 2)
         
 
-    def drawBarriers(self,front, left, right, back):
+    def drawBarriers(self, front, left, right, backright, backleft):
+
+        '''
+        for i in range(len(distances)):
+            if distances[i] != None:
+                distances[i] == round(distances[i],
+        '''
 
         barrier_thickness = 1.5*self.ppi
-        
-        #Draw front barrier
-        front_coords = (self.x-self.width/2, self.y-self.height/2 - barrier_thickness - front*self.ppi, self.width, barrier_thickness)
-        pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(front_coords))
 
-        #Draw left barrier
-        left_coords = (self.x-self.width/2 - barrier_thickness - left*self.ppi, self.y-self.height/2, barrier_thickness, self.height)
-        pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(left_coords))
+        if front != 'None' and float(front) <= 15:
+            #Draw front barrier
+            front_coords = (self.x-self.width/2, self.y-self.height/2 - barrier_thickness - float(front) *self.ppi, self.width, barrier_thickness)
+            pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(front_coords))
 
-        #Draw right barrier
-        right_coords = (self.x+self.width/2 + right*self.ppi, self.y-self.height/2, barrier_thickness, self.height)
-        pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(right_coords))
+        if left != 'None' and float(left) <= 15:
+            #Draw left barrier
+            left_coords = (self.x-self.width/2 - barrier_thickness - float(left)*self.ppi, self.y-self.height/2, barrier_thickness, self.height)
+            pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(left_coords))
 
-        #Draw back barrier
-        back_coords = (self.x-self.width/2, self.y+self.height/2 + back*self.ppi, self.width, barrier_thickness)
-        pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(back_coords))
+        if right != 'None' and float(right) <= 15:
+            #Draw right barrier
+            right_coords = (self.x+self.width/2 + float(right)*self.ppi, self.y-self.height/2, barrier_thickness, self.height)
+            pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(right_coords))
+
+        if backright != 'None' and float(backright) <= 15:
+            #Draw backright barrier
+            backright_coords = (self.x, self.y+self.height/2 + float(backright)*self.ppi, self.width/2, barrier_thickness)
+            pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(backright_coords))
+
+        if backleft != 'None' and float(backleft) <= 15:
+            #Draw backleft barrier
+            backleft_coords = (self.x-self.width/2, self.y+self.height/2 + float(backleft)*self.ppi, self.width/2, barrier_thickness)
+            pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(backleft_coords))
 
     def drawPredictionArrow(self, direction):
 
@@ -276,6 +291,9 @@ class LaneRobot():
 
         elif direction == 'backward':
             coordinates1, coordinates2 = drawArrow(180, self.x, self.y-height/2, 60, 30, self.x, self.y)
+
+        elif direction == 'none':
+            return
 
         rect = pygame.draw.polygon(self.screen, (255, 0, 0), coordinates2)
         triangle = pygame.draw.polygon(self.screen, (255, 0, 0), coordinates1)
@@ -394,6 +412,8 @@ class Compass():
 
         steps = 20
         tick_spacing = 2*math.pi/steps
+
+        orientation = (2*math.pi - orientation*math.pi/180)
 
         angle = 0
         while angle <= 2*math.pi:

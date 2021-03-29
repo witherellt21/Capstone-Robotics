@@ -12,36 +12,40 @@ class Arm():
         self.status = 'up'
 
     def armUp(self):
-        for i in range(80):
+        for i in range(100):
             self.kit.stepper2.onestep(direction = stepper.FORWARD, style = stepper.SINGLE)
             time.sleep(0.005)
+        self.kit.stepper2.release()
         
     def armDown(self):
         for i in range(90):
             self.kit.stepper2.onestep(direction = stepper.BACKWARD, style = stepper.SINGLE)
             time.sleep(0.005)
+        self.kit.stepper2.release()
             
     def openClaw(self):
-        self.kit.motor1.throttle = 1.0
-        time.sleep(0.3)
-        self.kit.motor1.throttle = 0
+        self.kit.motor2.throttle = .5
+        time.sleep(0.1)
+        self.kit.motor2.throttle = 0
         
     def closeClaw(self):
-        self.kit.motor1.throttle = -0.75
-        time.sleep(0.3)
-        self.kit.motor1.throttle = 0
+        self.kit.motor2.throttle = -.5
+        time.sleep(0.1)
+        self.kit.motor2.throttle = 0
 
 
 def main():
+    
+    a = Arm(0x61)
+    
     choice = 'Y'
     while choice == 'Y':
-        direction = input("Do you want to move the arm up (u) or down (d): ")
+        direction = input("Do you want to move the claw up (u) or down (d): ")
         
         if direction == 'u':
-            doubleStepUp()
+            a.armUp()
         elif direction == 'd':
-            doubleStepDown()
-            kit.stepper1.release()
+            a.armDown()
         else:
             choice = input("Hit Y to give new instruction or anything else to quit")
 
