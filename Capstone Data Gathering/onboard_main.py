@@ -3,7 +3,8 @@ Author: Taylor Witherell
 Filename: onboard_main.py
 Description: Main loop for robot to send and receive data.
 '''
-
+import board
+print(board.__version__)
 from server import Server
 from sonar import Sonar
 #import pygame

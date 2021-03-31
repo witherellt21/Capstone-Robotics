@@ -15,8 +15,8 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = True
-receiving_data = True
+server_online = False
+receiving_data = False
 pygame_running = True
 controller_connected = True
 trigger_turn = False
@@ -134,17 +134,17 @@ temp_data = 0
 accel_data = '0'
 gyro_data = '0'
 sonar_data = '0'
-front_dist = '0'
-backleft_dist = '20'
-backright_dist = '0'
-left_dist = '0'
-right_dist = '0'
+front_dist = '20'
+backleft_dist = '5'
+backright_dist = '5'
+left_dist = '3'
+right_dist = '4'
 ir_data = 1
 arm_data = 'up'
 
 yaw = 0.0
 
-turn_prediction = 'none'
+turn_prediction = 'forward'
 
 ax = ''
 ay = ''
@@ -357,6 +357,8 @@ while running:
         
         
         message += 'm1 = ' + str(m1_throttle) + ", m2 = " + str(m2_throttle) + ","
+
+        print(message)
         
     controllerList.append(time.time() - controller_start)
 
@@ -498,6 +500,7 @@ while running:
             scanner.draw(scanner_angle)
 
             #robot.displayWarnings()
+
         
         elif simulation == 'lanecontrol':
 
@@ -507,9 +510,10 @@ while running:
             robot.drawBarriers(front_dist, left_dist, right_dist, backright_dist, backleft_dist)
             robot.drawPredictionArrow(turn_prediction)
 
-
+        m1_throttle = 1
+        m2_throttle = 1
         cockpit.drawThrottles(abs(m1_throttle), abs(m2_throttle))
-        cockpit.drawIntensity(.9, .6)
+        cockpit.drawIntensity(.9, .1)
         displayText(cockpit_surface, "M1", font_14, cockpit.width*13/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "M2", font_14, cockpit.width*26/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "EMF INTENSITY", font_14, cockpit.width*57/60, cockpit.height/25, white, black )

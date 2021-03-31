@@ -96,6 +96,7 @@ while True:
         
     turn = input('Enter turn:')
     
+    
     if turn == 'a':
         turnLeft()
     elif turn == 'd':
@@ -104,4 +105,23 @@ while True:
         driveForward()
     elif turn == 's':
         stop()
-        
+    
+
+    '''
+    Start:
+
+    front thresh = 27
+    left thresh = 15
+    right thresh = 10
+
+    if left dist > 10:
+        get closer (apply throttles to move it slightly left)
+    else:
+        drive completely straight
+
+    when forced to make first turn (should be right):
+    front thresh = 10
+
+    after making a turn the robot should apply the straight method for a few seconds
+    '''
+
