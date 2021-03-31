@@ -153,9 +153,6 @@ class Robot():
             if moves[1] == 'up':
                 pass
                 
-            
-            
-
     def displayWarnings(self, barrier):
         direction = self.getDirection(barrier)
         if direction != None:
@@ -317,26 +314,43 @@ class Cockpit():
         width_m2 = (self.height*45/50-(self.height* 45/50 - m2 * self.height*40/50)) *math.tan(angle)
         width_m1 = (self.height*45/50-(self.height* 45/50 - m1 * self.height*40/50)) *math.tan(angle)
 
+        #outline_angle = math.tanh((self.width/14)/(self.height*45/50))
+        #width_outline = self.height*40/50 *math.tan(outline_angle)
+
         point_of_triangle = (self.width /6, self.height * 25/50 - offset)
         top_left = (self.width/6 - width_m2, self.height* 25/50 - m2* self.height*20/50 -offset )
         top_right = (self.width/6 + width_m2, self.height* 25/50 -  m2* self.height*20/50 -offset)
 
-        coordinates = [top_left, point_of_triangle, top_right]
+        m2_coordinates = [top_left, point_of_triangle, top_right]
 
-        m1_point_of_triangle = (self.width *4/10, self.height * 25/50 - offset)
-        
+        m1_point_of_triangle = (self.width *4/10, self.height * 25/50 - offset)        
         m1_top_left = (self.width*4/10-width_m1, self.height* 25/50 - m1 * self.height*20/50 - offset)
         m1_top_right = (self.width*4/10+width_m1, self.height* 25/50 - m1 * self.height*20/50 - offset)
+        
         m1_coordinates = [m1_top_left, m1_point_of_triangle, m1_top_right]
+
+
+        #outline_point = (self.width /6, self.height * 25/50 - offset + 10)
+        #outline_left = (self.width/6 - width_outline, self.height* 4/50 -offset )
+        #outline_right = (self.width/6 + width_outline, self.height* 5/50 -offset )
+
+        #m1_outline = []
+
+        #m2_outline = [outline_point, outline_left, outline_right]
 
 
         green_m1 = (1-m1)*255
         green_m2 = (1-m2)*255
 
-        pygame.draw.polygon(self.screen, (255, green_m2, 0), coordinates)
+        #pygame.draw.polygon(self.screen, (255, 255, 255), m2_outline)
+        #pygame.draw.polygon(self.screen, (255, green_m1, 0), m1_coordinates)
+        pygame.draw.polygon(self.screen, (255, green_m2, 0), m2_coordinates)
         pygame.draw.polygon(self.screen, (255, green_m1, 0), m1_coordinates)
 
         pygame.draw.line(self.screen, (255, 255, 255), (0, self.height * 30/50), (self.width, self.height*30/50), 2)
+
+
+        
 
     def drawIntensity(self, intensity1, intensity2):
 
@@ -379,8 +393,10 @@ class Cockpit():
         pygame.draw.polygon(self.screen, (0, 0, 0), getCoordinates(height, width, x1, y1, 'outline'))
         pygame.draw.polygon(self.screen, (0, 0, 0), getCoordinates(height, width, x2, y2, 'outline'))
         
-        pygame.draw.polygon(self.screen, (255, (1-intensity1)*255, 0), getCoordinates(height, width, x1, y1+height/2, 'meter', intensity1))
-        pygame.draw.polygon(self.screen, (255, (1-intensity2)*255, 0), getCoordinates(height, width, x2, y2+height/2, 'meter', intensity2))
+        #pygame.draw.polygon(self.screen, (255, (1-intensity1)*255, 0), getCoordinates(height, width, x1, y1+height/2, 'meter', intensity1))
+        #pygame.draw.polygon(self.screen, (255, (1-intensity2)*255, 0), getCoordinates(height, width, x2, y2+height/2, 'meter', intensity2))
+        pygame.draw.polygon(self.screen, ((1-intensity1)*255, 255, 0), getCoordinates(height, width, x1, y1+height/2, 'meter', intensity1))
+        pygame.draw.polygon(self.screen, ((1-intensity2) *255, 255, 0), getCoordinates(height, width, x2, y2+height/2, 'meter', intensity2))
         
     def drawArrowArm(self, arm_status):
 
