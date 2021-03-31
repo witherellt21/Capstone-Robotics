@@ -21,7 +21,7 @@ import math
 sonars_activated = False
 imu_activated = False
 ir_sensor_activated = False
-motors_running = True
+motors_running = False
 server_online = False
 motors_running = False
 server_online = True
@@ -30,12 +30,10 @@ keyboard_control = False
 camera_active = False
 cubesensor_active = False
 usfs_active = False
-camera_active = False
-cubesensor_active = False
 
-arm_active = True
+arm_active = False
 
-autonomous = True
+autonomous = False
 
 # ---------------- Initialize Server -----------------
 if server_online:
@@ -58,7 +56,7 @@ if sonars_activated:
     s_front = Sonar(6, 18)
     s_left = Sonar(5, 17)
     s_right = Sonar(12, 27)
-    #s_backright = Sonar(23, 24)
+    s_backright = Sonar(13, 22)
     s_backleft = Sonar(16, 23)
     
     
@@ -205,9 +203,12 @@ while running:
 
         distances = [front_dist, right_dist, backleft_dist, backright_dist, left_dist]
         
+        '''
         for i in range(len(distances)):
             if distances[i] != None:
                 distances[i] = round(float(distances[i]),2)
+                
+        '''#
         print(distances)
         
         

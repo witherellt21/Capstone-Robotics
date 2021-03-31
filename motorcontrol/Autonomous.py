@@ -7,7 +7,7 @@ from turnFunctions import robotManuevers as rm
 
 GPIO.setmode(GPIO.BCM)
 
-wheels = MotorKit(i2c = board.I2C())
+
 
 def distance(trig, echo):
     GPIO.setup(trig, GPIO.OUT)
@@ -124,20 +124,20 @@ if __name__=='__main__':
         distance1 = distance(5, 17)
         distance2 = distance(6, 18)
         distance3 = distance(12, 27)
-#         distance4 = distance(13, 22)
+        distance4 = distance(13, 22)
         distance5 = distance(16, 23)
     
         print(str(distance1)+ " " +str(distance2)+ " " +str(distance3)+" " +str(distance5))
         
-        front= distance(16, 17)
-        time.sleep(.1)
-        left = distance(13, 18)
-        time.sleep(.1)
-        right = distance(12,27)
-        time.sleep(.1)
-#         distance4 = distance(22, 6)
-#         distance5 = distance(23, 5)
-        leftHand()
-    
-        print(str(left) + ' ' + str(front) + ' ' + str(right))
-        
+#         front= distance(16, 17)
+#         time.sleep(.1)
+#         left = distance(13, 18)
+#         time.sleep(.1)
+#         right = distance(12,27)
+#         time.sleep(.1)
+# #         distance4 = distance(22, 6)
+# #         distance5 = distance(23, 5)
+#         leftHand()
+#     
+#         print(str(left) + ' ' + str(front) + ' ' + str(right))
+#         

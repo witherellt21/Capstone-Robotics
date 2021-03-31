@@ -13,6 +13,7 @@ class Camera():
        s.max()
        time.sleep(0.3)
        s.detach()
+       print('here3')
        #time.sleep(1)
 
     def FaceBackward(self):
@@ -36,6 +37,5 @@ class Camera():
        time.sleep(0.3)
        s.detach()
        #time.sleep(1)
-       
-       
+
 
