@@ -13,6 +13,7 @@ class Sonar():
 
     def __init__(self, trigger_pin, echo_pin):
         #GPIO Mode (BOARD / BCM)
+#         GPIO.cleanup()
         GPIO.setmode(GPIO.BCM)
         #GPIO.setmode(GPIO.BOARD)
 
@@ -32,6 +33,8 @@ class Sonar():
         GPIO.output(self.trigger, False)
 
         StartTime = time.time()
+        StopTime = time.time()
+        
         start = StartTime
 
         # save StartTime

@@ -119,6 +119,16 @@ def turnTracking ():
 if __name__=='__main__':
     GPIO.cleanup()
     while True:
+
+        time.sleep(0.5)
+        distance1 = distance(5, 17)
+        distance2 = distance(6, 18)
+        distance3 = distance(12, 27)
+#         distance4 = distance(13, 22)
+        distance5 = distance(16, 23)
+    
+        print(str(distance1)+ " " +str(distance2)+ " " +str(distance3)+" " +str(distance5))
+        
         front= distance(16, 17)
         time.sleep(.1)
         left = distance(13, 18)
