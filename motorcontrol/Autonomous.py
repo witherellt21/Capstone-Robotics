@@ -28,7 +28,7 @@ def distance(trig, echo):
         
     TimeElapsed = StopTime - StartTime
     
-    distance = (TimeElapsed * 34300) / 2
+    distance = (TimeElapsed * 34300*0.393701) / 2
     
     return distance
 
@@ -50,6 +50,16 @@ def turnTracking ():
     
     leftCount = 0
     rightCount = 0
+    
+    
+    time.sleep(0.5)
+    left = distance(5, 17)
+    front = distance(6, 18)
+    right = distance(12, 27)
+    backRight = distance(13, 22)
+    backLeft = distance(16, 23)
+
+    print(str(left)+ " " +str(front)+ " " +str(right)+" " +str(backRight) + " " +str(backLeft))
     
     if leftCount == 0 and left > 50:
         print("turning left")
@@ -116,18 +126,79 @@ def turnTracking ():
 # 
 #             return yaw
 
+def turnTrackingTrial():
+    
+    rm.stopMoving()
+    
+    leftCount = 0
+    rightCount = 0
+    turnCount = 0
+    fCount = 0
+    while True:
+        time.sleep(0.5)
+        left = distance(5, 17)
+        front = distance(6, 18)
+        right = distance(12, 27)
+#         backRight = distance(13, 22)
+#         backLeft = distance(16, 23)
+        print(str(left)+ " " +str(front)+ " " +str(right))
+
+
+
+        if turnCount == 0:
+            if front > 9:
+                print("forward")
+                rm.goStraight()
+            if front<9 and left<40 and right>20:
+                rm.turnRight90()
+                print("right")
+                turnCount+=1
+        elif turnCount == 1:
+            if front > 13:
+                print("forward")
+                rm.goStraight()
+            if front <13 and left>20:
+                rm.turnLeft90()
+                print("left")
+                turnCount+=1
+                
+        elif turnCount == 2:
+            if front>9:
+                print("forward")
+                rm.goStraight()
+            if front<9 and right>10:
+                rm.turnRight90()
+                print("right")
+                turnCount+=1
+        elif turnCount ==3:
+            if front>11.2:
+                print("forward")
+                rm.goStraight()
+            if front<11.2 and left>25:
+                rm.turnLeft90Over()
+                print("left")
+                turnCount += 1
+        elif turnCount==4:
+            if front>5:
+                rm.goStraight()
+                print("forward")
+            else:
+                rm.stopMoving()
+                break
+    
+
+                
+        
+
+    
+
+
 if __name__=='__main__':
     GPIO.cleanup()
-    while True:
+    turnTrackingTrial()
 
-        time.sleep(0.5)
-        distance1 = distance(5, 17)
-        distance2 = distance(6, 18)
-        distance3 = distance(12, 27)
-        distance4 = distance(13, 22)
-        distance5 = distance(16, 23)
-    
-        print(str(distance1)+ " " +str(distance2)+ " " +str(distance3)+" " +str(distance5))
+        
+            
         
 #         front= distance(16, 17)
 #         time.sleep(.1)
