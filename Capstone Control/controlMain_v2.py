@@ -15,8 +15,8 @@ from ps3controller import Controller
 from PIL import ImageFont
 
 # Toggle simulation elements
-server_online = False
-receiving_data = False
+server_online = True
+receiving_data = True
 pygame_running = True
 controller_connected = True
 trigger_turn = False
@@ -123,7 +123,7 @@ if pygame_running:
 if server_online:
     # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
-    PORT = 20001
+    PORT = 20000
     r = Receiver(IP, PORT)
     r.client.connect()
 
@@ -141,6 +141,11 @@ left_dist = '3'
 right_dist = '4'
 ir_data = 1
 arm_data = 'up'
+
+emf_data = '0,0'
+
+intensity1 = 0
+intensity2 = 0
 
 yaw = 0.0
 
@@ -255,13 +260,7 @@ while running:
                 scanner_angle -= 2
                 trigger = "triggerright"
 
-        # Set robot to autonomous mode
-        if c.joystick.get_button(8):
-            time.sleep(0.3)
-            if control_mode == "user-controlled":
-                control_mode = "autonomous"
-            else:
-                control_mode = "user-controlled"
+        
 
         # Control camera movements using D-pad
         if camera_vert_axis:
@@ -292,6 +291,15 @@ while running:
             message += ",clawopen,"
         elif c.joystick.get_button(3):
             message += ",clawclosed,"
+
+        if c.joystick.get_button(8):
+            
+            if control_mode == 'user-controlled':
+                control_mode = 'autonomous'
+            else:
+                control_mode = 'user-controlled'
+            print(control_mode)
+            time.sleep(0.2)
         
 
         # Decrease sensitivity
@@ -357,8 +365,9 @@ while running:
         
         
         message += 'm1 = ' + str(m1_throttle) + ", m2 = " + str(m2_throttle) + ","
+        message += control_mode
 
-        print(message)
+
         
     controllerList.append(time.time() - controller_start)
 
@@ -428,8 +437,10 @@ while running:
 
 
         #GET CUBE SENSOR DATA
-        #emf_data = r.getEMF(emf_data)
-        #emf_datalist = emf_data.split(',')
+        emf_data = r.getEMF(emf_data)
+        emf_datalist = emf_data.split(',')
+        intensity1 = emf_datalist[0]
+        intensity2 = emf_datalist[1]
         
         if data_status == 'printing':
             print('\n')
@@ -513,7 +524,7 @@ while running:
         m1_throttle = 1
         m2_throttle = 1
         cockpit.drawThrottles(abs(m1_throttle), abs(m2_throttle))
-        cockpit.drawIntensity(.9, .1)
+        cockpit.drawIntensity(int(intensity1), int(intensity2))
         displayText(cockpit_surface, "M1", font_14, cockpit.width*13/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "M2", font_14, cockpit.width*26/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "EMF INTENSITY", font_14, cockpit.width*57/60, cockpit.height/25, white, black )
