@@ -48,3 +48,5 @@ class IMU():
     def read_magnetometer(self):
         mag = self.driver.read_magnetometer()
         print('Mag {}'.format(mag))
+
+imu = IMU()

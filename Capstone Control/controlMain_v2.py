@@ -128,27 +128,37 @@ if pygame_running:
     font_24 = pygame.font.Font('freesansbold.ttf', 24)
 
 
+# ---------------- Initialize Receiver/Server -----------------
+if server_online:
+    # Make sure IP and PORT match server side IP and PORT
+    IP = '192.168.2.2'
+    PORT = 20000
+    r = Receiver(IP, PORT)
+    r.client.connect()
+
 
 # ---------------- Initialize Variables -----------------
 temp_data = 0
 accel_data = '0'
 gyro_data = '0'
 sonar_data = '0'
-front_dist = '0'
-backleft_dist = 20
-backright_dist = 20
-left_dist = 20
-right_dist = 20
+
+front_dist = '20'
+backleft_dist = '5'
+backright_dist = '5'
+left_dist = '3'
+right_dist = '4'
 ir_data = 1
 arm_data = 'up'
 
-sensor1 = '0.0'
-sensor2 = '0.0'
-emf_data = '0, 0'
+emf_data = '0,0'
+
+intensity1 = 0
+intensity2 = 0
 
 yaw = 0.0
 
-turn_prediction = 'none'
+turn_prediction = 'forward'
 
 ax = ''
 ay = ''
@@ -259,13 +269,7 @@ while running:
                 scanner_angle -= 2
                 trigger = "triggerright"
 
-        # Set robot to autonomous mode
-        if c.joystick.get_button(8):
-            time.sleep(0.3)
-            if control_mode == "user-controlled":
-                control_mode = "autonomous"
-            else:
-                control_mode = "user-controlled"
+        
 
         #if c.joystick.get_button(6):
         #    pass
@@ -300,6 +304,15 @@ while running:
             message += ",clawopen,"
         elif c.joystick.get_button(3):
             message += ",clawclosed,"
+
+        if c.joystick.get_button(8):
+            
+            if control_mode == 'user-controlled':
+                control_mode = 'autonomous'
+            else:
+                control_mode = 'user-controlled'
+            print(control_mode)
+            time.sleep(0.2)
         
 
         # Decrease sensitivity
@@ -365,6 +378,9 @@ while running:
         
         
         message += 'm1 = ' + str(m1_throttle) + ", m2 = " + str(m2_throttle) + ","
+        message += control_mode
+
+
         
     controllerList.append(time.time() - controller_start)
 
@@ -434,9 +450,10 @@ while running:
 
         #GET CUBE SENSOR DATA
         emf_data = r.getEMF(emf_data)
-        sensor1 = emf_data.split(',')[0].strip()
-        sensor2 = emf_data.split(',')[1].strip()
-        #emf_datalist = emf_data.split(',')
+
+        emf_datalist = emf_data.split(',')
+        intensity1 = emf_datalist[0]
+        intensity2 = emf_datalist[1]
         
         if data_status == 'printing':
             print('\n')
@@ -507,6 +524,7 @@ while running:
             scanner.draw(scanner_angle)
 
             #robot.displayWarnings()
+
         
         elif simulation == 'lanecontrol':
             distances = [front_dist, left_dist, right_dist, backright_dist, backleft_dist]
@@ -515,9 +533,12 @@ while running:
             robot.drawBarriers(front_dist, left_dist, right_dist, backright_dist, backleft_dist)
             robot.drawPredictionArrow(turn_prediction)
 
-
+        m1_throttle = 1
+        m2_throttle = 1
         cockpit.drawThrottles(abs(m1_throttle), abs(m2_throttle))
-        cockpit.drawIntensity(sensor1, sensor2)
+
+        cockpit.drawIntensity(int(intensity1), int(intensity2))
+
         displayText(cockpit_surface, "M1", font_14, cockpit.width*13/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "M2", font_14, cockpit.width*26/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "EMF INTENSITY", font_14, cockpit.width*57/60, cockpit.height/25, white, black )
