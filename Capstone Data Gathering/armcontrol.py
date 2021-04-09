@@ -22,16 +22,21 @@ class Arm():
             self.kit.stepper2.onestep(direction = stepper.BACKWARD, style = stepper.SINGLE)
             time.sleep(0.005)
         self.kit.stepper2.release()
-            
+class Claw():
+    
+    def __init__(self, _address):
+        self.kit = MotorKit(address = _address)
+    
     def openClaw(self):
-        self.kit.motor2.throttle = .5
+        print('here')
+        self.kit.motor3.throttle = .5
         time.sleep(0.1)
-        self.kit.motor2.throttle = 0
+        self.kit.motor3.throttle = 0
         
     def closeClaw(self):
-        self.kit.motor2.throttle = -.5
+        self.kit.motor3.throttle = -.5
         time.sleep(0.1)
-        self.kit.motor2.throttle = 0
+        self.kit.motor3.throttle = 0
 
 
 def main():

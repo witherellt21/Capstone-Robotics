@@ -195,9 +195,25 @@ def turnTrackingTrial():
 
 if __name__=='__main__':
     GPIO.cleanup()
-    turnTrackingTrial()
-
-        
+    #turnTrackingTrial()
+#     while True:
+#         time.sleep(0.5)
+#         left = distance(5, 17)
+#         front = distance(6, 18)
+#         right = distance(12, 27)
+# 
+#         print(str(left)+ " " +str(front)+ " " +str(right))
+#     while True:
+#         turn = input("l, r, or o")
+#         if turn == 's':
+#             rm.goStraight()
+#         elif turn =='r':
+#             rm.turnRight90()
+#         elif turn == 'o':
+#             rm.turnLeft90Over()
+#         else:
+#             break
+   
             
         
 #         front= distance(16, 17)

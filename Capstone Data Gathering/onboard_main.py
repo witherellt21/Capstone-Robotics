@@ -10,7 +10,7 @@ from sonar import Sonar
 #import pygame
 import time
 from CameraServo import Camera
-from armcontrol import Arm  # NEEED TO DOWNLOAD BOARD DEPOENDENCY
+from armcontrol import Arm, Claw  # NEEED TO DOWNLOAD BOARD DEPOENDENCY
 #from imu import IMU
 from IRsensor import IR
 from adafruit_motorkit import MotorKit
@@ -20,20 +20,19 @@ import math
 from turnFunctions import robotManuevers as rm
 
 
-
-sonars_activated = True 
+sonars_activated = False 
 imu_activated = False
 ir_sensor_activated = False
-motors_running = True
 server_online = True
 motors_running = True
 trigger_turn = False
 keyboard_control = False
 camera_active = True
 cubesensor_active = False
-usfs_active = False
+usfs_active = True
 
-arm_active = False
+arm_active = True
+claw_active = True
 
 autonomous = False
 
@@ -42,7 +41,7 @@ if server_online:
     # Set the client to the server's IP and PORT address
     #IP = '192.168.2.2'
     IP = '192.168.2.2'
-    PORT = 20001
+    PORT = 20002
     server = Server(IP, PORT)
 
     server.start()
@@ -90,6 +89,10 @@ if motors_running:
     robot = MotorKit()
 if arm_active: 
     arm = Arm(0x61)
+if claw_active:
+    claw = Claw(0x62)
+
+
 
 
 
@@ -99,6 +102,8 @@ if cubesensor_active:
 
 
 # ---------------- Initialize USFS -----------------
+yaw = '0'
+
 if usfs_active:
     MAG_RATE = 100
     ACCEL_RATE = 200
@@ -129,10 +134,78 @@ if usfs_active:
             yaw += 9.1
             if yaw < 0: yaw += 360.0
             
+            yaw += 200
+            
             return yaw
         
         return last_value
+    
+    print("\nAligning USFS...\n")
+    for i in range(200):
+        yaw = getYaw(yaw)
+
+def turn(direction, angle, start_pos):
+    robot.motor3.throttle = 0
+    robot.motor4.throttle = 0
+    time.sleep(1)
+    curr_orientation = start_pos
+    last_value = start_pos
         
+    while abs(curr_orientation - start_pos) <=angle:
+        if direction == 'right':
+            robot.motor3.throttle = -0.65
+            robot.motor4.throttle = 0.65
+        elif direction == 'left':
+            robot.motor3.throttle = 0.65
+            robot.motor4.throttle = -0.65
+            
+        curr_orientation = getYaw(curr_orientation)
+        if abs(curr_orientation - last_value) >= 10 or curr_orientation < 0:
+            curr_orientation = last_value
+        else:
+            last_value = curr_orientation
+        #print(curr_orientation)
+    #print(abs(curr_orientation - start_pos))
+    robot.motor3.throttle = 0
+    robot.motor4.throttle = 0
+    time.sleep(1)
+'''
+def alignRight(curr_orientation):
+    last_value = curr_orientation
+    while curr_orientation <= 263:
+        robot.motor3.throttle = -0.6
+        robot.motor4.throttle = 0.6
+        
+        curr_orientation = getYaw(curr_orientation)
+        if abs(curr_orientation - last_value) >= 10 or curr_orientation < 0:
+            curr_orientation = last_value
+        else:
+            last_value = curr_orientation
+    robot.motor3.throttle = 0
+    robot.motor4.throttle = 0
+        
+def alignLeft(curr_orientation):
+    last_value = curr_orientation
+    while abs(curr_orientation) >=263:
+        robot.motor3.throttle = 0.6
+        robot.motor4.throttle = -0.6
+        
+        curr_orientation = getYaw(curr_orientation)
+        if abs(curr_orientation - last_value) >= 10 or curr_orientation < 0:
+            curr_orientation = last_value
+        else:
+            last_value = curr_orientation
+    robot.motor3.throttle = 0
+    robot.motor4.throttle = 0
+'''
+
+def goStraight():
+    robot.motor3.throttle = 0.64
+    robot.motor4.throttle = 0.57
+    
+def stopMoving():
+    robot.motor3.throttle = 0
+    robot.motor4.throttle = 0
 
 # ---------------- Initialize Camera -----------------
 if camera_active:
@@ -144,8 +217,6 @@ gyro = '0'
 acc = '0'
 ir_status = 1
 msg = '0'
-
-yaw = '0'
 
 arm_status = 'up'
 
@@ -176,9 +247,15 @@ sensor2 = '0'
 
 turnCount = 0
 
+
+print("\nBegin Robot Simulation.\n")
+if motors_running:
+    robot.motor3.throttle = 0
+    robot.motor4.throttle = 0
+    
+inp = input("Press Enter")
 running = True
 while running:
-    #print('hi')
     if not autonomous:
         if server_online:
 
@@ -223,176 +300,257 @@ while running:
         
         sensor1 = int.from_bytes(sensor1, "little", signed =False)
         sensor2 = int.from_bytes(sensor2, "little", signed =False)
+        #print("sensor1 =", sensor1)
+        #print("sensor2 =", sensor2)
         
         
     if usfs_active:
         yaw = getYaw(yaw)
-        #print(int_val)
-
-    if usfs_active:
-        yaw = getYaw()
-
 
     if motors_running and arm_active:
         arm_status = arm.status
 
     # Compile a data string to send to the client
     msg = "sonar = " + str(distances) + ",, temp = " + str(temp) + ",, accel = " + str(acc) + \
-            ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status) + ',,arm =' + str(arm_status) + ',,emf =' + str(sensor1) + ',' + str(sensor1) 
-    print(distances)
+            ",, gyro = " + str(gyro) + ",, ir = " + str(ir_status) + ',,arm =' + str(arm_status) + ',,emf =' + str(sensor1) + ',' + str(sensor2)
+    
     if autonomous:
+        sonars_activated = True
+    
+        yaw = getYaw(yaw)
+        #while True:
+            #yaw = getYaw(yaw)
+            #print(yaw)
+        '''
+        difference = yaw - 263
         
+        if turnCount == -1:
+            if abs(difference) > 1:
+                if difference < 0:
+                    alignRight(yaw)
+                    turnCount += 1
+                else:
+                    alignLeft(yaw)
+                    turnCount += 1
+        '''
+        
+        if turnCount == 0:
+            if front_dist >= 7:
+                #print("forward")
+                
+                goStraight()
+            if front_dist<7 and left_dist<40 and right_dist>20:
+                stopMoving()
+                last_yaw = yaw
+                for i in range(4):
+                    yaw = getYaw(last_yaw)
+                    if abs(yaw-last_yaw) <= 5 and yaw!= last_yaw:
+                        break
+                    last_yaw = yaw
+                turn("right", 86, yaw)
+                #print("right")
+                turnCount+=1
+        elif turnCount == 1:
+            if front_dist > 11:
+                #print("forward")
+                goStraight()
+            if front_dist <11 and left_dist>20:
+                stopMoving()
+                last_yaw = yaw
+                for i in range(4):
+                    yaw = getYaw(last_yaw)
+                    if abs(yaw-last_yaw) <= 5 and yaw!= last_yaw:
+                        break
+                    last_yaw = yaw
+                turn("left", 86, yaw)
+                #print("left")
+                turnCount+=1
+                
+        elif turnCount == 2:
+            if front_dist>9:
+                #print("forward")
+                goStraight()
+            if front_dist<9 and right_dist>10:
+                stopMoving()
+                last_yaw = yaw
+                for i in range(4):
+                    yaw = getYaw(last_yaw)
+                    if abs(yaw-last_yaw) <= 5 and yaw!= last_yaw:
+                        break
+                    last_yaw = yaw
+                turn("right", 86, yaw)
+                #print("right")
+                turnCount+=1
+        elif turnCount ==3:
+            if front_dist>15:
+                #print("forward")
+                goStraight()
+            if front_dist<15 and left_dist>25:
+                stopMoving()
+                last_yaw = yaw
+                for i in range(4):
+                    yaw = getYaw(last_yaw)
+                    if abs(yaw-last_yaw) <= 5 and yaw!= last_yaw:
+                        break
+                    last_yaw = yaw
+                turn("left", 88, yaw)
+                #print("left")
+                turnCount += 1
+        elif turnCount==4:
+            if front_dist>5:
+                goStraight()
+                #print("forward")
+            else:
+                stopMoving()
+                autonomous = False
+        '''
+        turn_auto = rm(robot)
         if turnCount == 0:
             print('in auto')
             if front_dist > 9:
                 print("forward")
                 
-                rm.goStraight()
+                turn_auto.goStraight()
             if front_dist<9 and left_dist<40 and right_dist>20:
-                rm.turnRight90()
+                #turn_auto.turnRight90()
                 print("right")
                 turnCount+=1
         elif turnCount == 1:
-            if front_dist > 13:
+            if front_dist > 12:
                 print("forward")
-                rm.goStraight()
-            if front_dist <13 and left_dist>20:
-                rm.turnLeft90()
+                turn_auto.goStraight()
+            if front_dist <12 and left_dist>20:
+                turn_auto.turnLeft()
                 print("left")
                 turnCount+=1
                 
         elif turnCount == 2:
             if front_dist>9:
                 print("forward")
-                rm.goStraight()
+                turn_auto.goStraight()
             if front_dist<9 and right_dist>10:
-                rm.turnRight90()
+                turn_auto.turnRight90()
                 print("right")
                 turnCount+=1
         elif turnCount ==3:
-            if front_dist>11.2:
+            if front_dist>12:
                 print("forward")
-                rm.goStraight()
-            if front_dist<11.2 and left_dist>25:
-                rm.turnLeft90Over()
+                turn_auto.goStraight()
+            if front_dist<12 and left_dist>25:
+                turn_auto.overturnLefti()
                 print("left")
                 turnCount += 1
         elif turnCount==4:
             if front_dist>5:
-                rm.goStraight()
+                turn_auto.goStraight()
                 print("forward")
             else:
-                rm.stopMoving()
+                turn_auto.stopMoving()
                 break
-                
+        '''
                 
         
             
 
     #time.sleep(3)
-    if not autonomous:
-        if server_online:
-            # If client disconnects from server, reconnect
-            if server.disconnect_counter > 0:
-                server.receiveConnection()
-            # Send sensor data to client
+    if server_online:
+        # If client disconnects from server, reconnect
+        if server.disconnect_counter > 0:
+            server.receiveConnection()
+        # Send sensor data to client
 
-            server.send(msg)
+        server.send(msg)
 
-            time.sleep(0.03)
+        time.sleep(0.03)
 
-            # Receive control data from client
-            control = server.receive()
+        # Receive control data from client
+        control = server.receive()
 
-            if control:
-                datalist = control.split(',')
-            # Wheels are turned at the same ratio as the joystick is held
-            # M1 is right side wheel
-            # M2 is left side
-            '''
-            if trigger_turn:
-                if datalist:
-                    for data in datalist:
-                        if 'left' in data:
-                            m1_throttle = None
-                            m2_throttle = -0.8
-                        elif 'right' in data:
-                            m1_throttle = -0.8
-                            m2_throttle = None
-                        elif 'drive' in data:
-                            drive = float(data.split('=')[1])
-                            m1_throttle = -drive
-                            m2_throttle = -drive
-
-            
-            #print("Controls")
-            if keyboard_control:
-                for data in datalist:
-                    if 'forward' in data:
-                        m1_throttle = 0.8
-                        m2_throttle = 0.8
-                    elif 'left' in data:
-                        m1_throttle = 0.8
-                        m2_throttle = None
-                    if 'right' in data:
-                        m1_throttle = None
-                        m2_throttle = 0.8
-                    if 'backward' in data:
-                        m1_throttle = -0.8
-                        m2_throttle = -0.8
-                    if 'none' in data:
-                        m1_throttle = None
-                        m2_throttle = None
-            '''
-            print(datalist)
+        if control:
+            datalist = control.split(',')
+        # Wheels are turned at the same ratio as the joystick is held
+        # M1 is right side wheel
+        # M2 is left side
+        '''
+        if trigger_turn:
             if datalist:
                 for data in datalist:
-                    #print(data)
-                    if not autonomous:
-                        if 'm1' in data:
-                            try:
-                                m1_throttle = round(float(data.split('=')[1]), 2)
-                            except:
-                                pass
-                        elif 'm2' in data:
-                            try:
-                                m2_throttle = round(float(data.split('=')[1]), 2)
-                            except:
-                                pass                        
-                    if data == 'cameraforward':
-                        #print('here')
-                        c.FaceForward()
-                    elif data == 'camerabackward':
-                        c.FaceBackward()
-                    elif data == 'cameraleft':
-                        c.FaceLeft()
-                    elif data == 'cameraright':
-                        c.FaceRight()
-                    elif data == 'armup':
-                        if not arm.status == 'up':
-                            arm.armUp()
-                            arm.status = 'up'
-                    elif data == 'armdown':
-                        if not arm.status == 'down':
-                            arm.armDown()
-                            arm.status = 'down'
-                    elif data == 'clawopen':
-                        arm.openClaw()
-                    elif data == 'clawclosed':
-                        arm.closeClaw()
-                    elif 'autonomous' in data:
-                        autonomous = True
-                    elif 'user-controlled' in data:
-                        autonomous = False
-                    elif 'cubedetection' in data:
-                        if data.split(' = ')[1] == 0:
-                            if cubesensor_active:
-                                cubesensor_active = False
-                        else:
-                            if not cubesensor_active:
-                                cubesensor_active = True
-                
-                    
+                    if 'left' in data:
+                        m1_throttle = None
+                        m2_throttle = -0.8
+                    elif 'right' in data:
+                        m1_throttle = -0.8
+                        m2_throttle = None
+                    elif 'drive' in data:
+                        drive = float(data.split('=')[1])
+                        m1_throttle = -drive
+                        m2_throttle = -drive
+
+        
+        #print("Controls")
+        if keyboard_control:
+            for data in datalist:
+                if 'forward' in data:
+                    m1_throttle = 0.8
+                    m2_throttle = 0.8
+                elif 'left' in data:
+                    m1_throttle = 0.8
+                    m2_throttle = None
+                if 'right' in data:
+                    m1_throttle = None
+                    m2_throttle = 0.8
+                if 'backward' in data:
+                    m1_throttle = -0.8
+                    m2_throttle = -0.8
+                if 'none' in data:
+                    m1_throttle = None
+                    m2_throttle = None
+        '''
+        if datalist:
+            for data in datalist:
+                #print(data)
+                if not autonomous:
+                    if 'm1' in data:
+                        try:
+                            m1_throttle = round(float(data.split('=')[1]), 2)
+                        except:
+                            pass
+                    elif 'm2' in data:
+                        try:
+                            m2_throttle = round(float(data.split('=')[1]), 2)
+                        except:
+                            pass                        
+                if data == 'cameraforward':
+                    #print('here')
+                    c.FaceForward()
+                elif data == 'camerabackward':
+                    c.FaceBackward()
+                elif data == 'cameraleft':
+                    c.FaceLeft()
+                elif data == 'cameraright':
+                    c.FaceRight()
+                elif data == 'armup':
+                    arm.armUp()
+                    arm.status = 'up'
+                elif data == 'armdown':
+                    arm.armDown()
+                    arm.status = 'down'
+                elif data == 'clawopen':
+                    claw.openClaw()
+                elif data == 'clawclosed':
+                    claw.closeClaw()
+                elif 'autonomous' in data:
+                    autonomous = True
+                elif 'user-controlled' in data:
+                    autonomous = False
+                elif 'emf' in data:
+                    if cubesensor_active:
+                        cubesensor_active = False
+                    else: cubesensor_active = True
+                elif 'ultrasonic' in data:
+                    if sonars_activated:
+                        sonars_activated = False
+                    else: sonars_activated = True
             
         #print('Motor 1 Throttle =', m1_throttle, '\nMotor 2 Throttle =', m2_throttle)
         if not autonomous:
