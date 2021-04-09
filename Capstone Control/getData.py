@@ -41,10 +41,6 @@ class Receiver():
     def getSonar(self, last):
         for data in self.datalist:
             if 'sonar' in data:
-                #sonar_total = data.split('=')[1]
-                #sonar_split = sonar_total.strip('[').strip(']')
-                #print(sonar_split)
-                #print(data.split('=')[1])
                 try: return data.split('=')[1].strip()
                 except: return last
         return last
@@ -67,6 +63,30 @@ class Receiver():
 
         #if len(self.datalist) > 0:
             #return self.datalist[0].strip()
+
+    def getEMF(self, last):
+        for data in self.datalist:
+            if 'emf' in data:
+                return data.split('=')[1].strip()
+                #except: return last
+        return last
+
+        #if len(self.datalist) > 0:
+            #return self.datalist[0].strip()
+
+    def getArm(self, last):
+        for data in self.datalist:
+            if 'arm' in data:
+                return data.split('=')[1].strip()
+                #except: return last
+        return last
+
+    def getYaw(self, last):
+        for data in self.datalist:
+            if 'yaw' in data:
+                return data.split('=')[1].strip()
+        return last
+        
     '''
     def getIMU(self, last):
         for data in self.datalist:
