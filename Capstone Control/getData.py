@@ -67,8 +67,7 @@ class Receiver():
     def getEMF(self, last):
         for data in self.datalist:
             if 'emf' in data:
-                print(data)
-                #return data.split('=')[1].strip()
+                return data.split('=')[1].strip()
                 #except: return last
         return last
 

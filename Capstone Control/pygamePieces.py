@@ -261,7 +261,7 @@ class LaneRobot():
             #Draw right barrier
             right_coords = (self.x+self.width/2 + float(right)*self.ppi, self.y-self.height/2, barrier_thickness, self.height)
             pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(right_coords))
-
+        '''
         if backright != 'None' and float(backright) <= 15:
             #Draw backright barrier
             backright_coords = (self.x, self.y+self.height/2 + float(backright)*self.ppi, self.width/2, barrier_thickness)
@@ -271,7 +271,7 @@ class LaneRobot():
             #Draw backleft barrier
             backleft_coords = (self.x-self.width/2, self.y+self.height/2 + float(backleft)*self.ppi, self.width/2, barrier_thickness)
             pygame.draw.rect(self.screen, (150, 150, 255), pygame.Rect(backleft_coords))
-
+        '''
     def drawPredictionArrow(self, direction):
 
         height = 60
@@ -383,6 +383,9 @@ class Cockpit():
         
         height = 90
         width = 30
+
+        intensity1 = float(intensity1)/255
+        intensity2 = float(intensity2)/255
         
         pygame.draw.polygon(self.screen, (255, 255, 255), getCoordinates(height, width, x1, y1, 'outline'))
         pygame.draw.polygon(self.screen, (255, 255, 255), getCoordinates(height, width, x2, y2, 'outline'))
@@ -392,6 +395,9 @@ class Cockpit():
         
         pygame.draw.polygon(self.screen, (0, 0, 0), getCoordinates(height, width, x1, y1, 'outline'))
         pygame.draw.polygon(self.screen, (0, 0, 0), getCoordinates(height, width, x2, y2, 'outline'))
+
+        intensity1 = intensity1/400
+        intensity2 = intensity2/400
         
         #pygame.draw.polygon(self.screen, (255, (1-intensity1)*255, 0), getCoordinates(height, width, x1, y1+height/2, 'meter', intensity1))
         #pygame.draw.polygon(self.screen, (255, (1-intensity2)*255, 0), getCoordinates(height, width, x2, y2+height/2, 'meter', intensity2))
