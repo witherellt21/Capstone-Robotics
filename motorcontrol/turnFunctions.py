@@ -41,6 +41,7 @@ class robotManuevers:
     def goStraight():
         wheels.motor3.throttle = 0.64
         wheels.motor4.throttle = 0.54
+
 #         time.sleep(0.5)
 #         wheels.motor3.throttle = 0
 #         wheels.motor4.throttle = 0

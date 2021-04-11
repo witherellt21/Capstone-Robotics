@@ -6,6 +6,8 @@ from adafruit_motor import stepper
 
 # wheels = MotorKit(i2c = board.I2C(), address = 0x61)
 arm = MotorKit(i2c = board.I2C(), address = 0x61)
+claw = MotorKit(i2c = board.I2C(), address = 0x62)
+wheels = MotorKit(i2c = board.I2C(), address = 0x60)
 
 arm.stepper2.release()
 
@@ -20,14 +22,14 @@ def armDown():
         time.sleep(0.005)
         
 def openClaw():
-    arm.motor2.throttle = 1.0
+    claw.motor3.throttle = 1.0
     time.sleep(0.3)
-    arm.motor2.throttle = 0
+    claw.motor3.throttle = 0
     
 def closeClaw():
-    arm.motor2.throttle = -0.75
+    wheels.motor3.throttle = -0.75
     time.sleep(0.3)
-    arm.motor2.throttle = 0
+    wheels.motor3.throttle = 0
     
 more = 'y'
 

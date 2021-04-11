@@ -2,80 +2,86 @@ import time
 import board
 from adafruit_motorkit import MotorKit
 
-wheels = MotorKit(i2c = board.I2C())
 
 class robotManuevers:
-    def turnLeft90Over():
-        wheels.motor3.throttle = 0
-        wheels.motor4.throttle = 0
+    
+    def __init__(self, robot = MotorKit(address = 0x60)):
+        self.wheels = robot
+        
+    def overturnLeft(self):
+        self.wheels.motor3.throttle = 0
+        self.wheels.motor4.throttle = 0
         time.sleep(.5)
-        wheels.motor3.throttle = 0.80
-        wheels.motor4.throttle = -0.67
-        time.sleep(.84)
-        wheels.motor3.throttle = 0
-        wheels.motor4.throttle = 0
+        self.wheels.motor3.throttle = 0.80
+        self.wheels.motor4.throttle = -0.67
+        time.sleep(.8)
+        self.wheels.motor3.throttle = 0
+        self.wheels.motor4.throttle = 0
         time.sleep(.5)
         
-    def turnLeft90():
-        wheels.motor3.throttle = 0
-        wheels.motor4.throttle = 0
-        time.sleep(.5)
-        wheels.motor3.throttle = 0.7
-        wheels.motor4.throttle = -0.65
-        time.sleep(.93)
-        wheels.motor3.throttle = 0
-        wheels.motor4.throttle = 0
+    def turnLeft(self):
+        self.wheels.motor3.throttle = 0
+        self.wheels.motor4.throttle = 0
+        time.sleep(.75)
+        self.wheels.motor3.throttle = 0.7
+        self.wheels.motor4.throttle = -0.65
+        time.sleep(.91)
+        self.wheels.motor3.throttle = 0
+        self.wheels.motor4.throttle = 0
         time.sleep(.5)
         
-    def turnRight90():
-        wheels.motor3.throttle = 0
-        wheels.motor4.throttle = 0
+    def turnRight90(self):
+        self.wheels.motor3.throttle = 0
+        self.wheels.motor4.throttle = 0
         time.sleep(.5)
-        wheels.motor3.throttle = -0.68
-        wheels.motor4.throttle = 0.67
+        self.wheels.motor3.throttle = -0.68
+        self.wheels.motor4.throttle = 0.67
         time.sleep(.89)
-        wheels.motor3.throttle = 0
-        wheels.motor4.throttle = 0
+        self.wheels.motor3.throttle = 0
+        self.wheels.motor4.throttle = 0
         time.sleep(.5)
         
-    def goStraight():
-        wheels.motor3.throttle = 0.64
-        wheels.motor4.throttle = 0.54
+    def goStraight(self):
+        self.wheels.motor3.throttle = 0.64
+        self.wheels.motor4.throttle = 0.54
 #         time.sleep(0.5)
-#         wheels.motor3.throttle = 0
-#         wheels.motor4.throttle = 0
+#         self.wheels.motor3.throttle = 0
+#         self.wheels.motor4.throttle = 0
 #         time.sleep(0.5)
     
-    def goStraightVeerLeft():
-        wheels.motor3.throttle = 0.59
-        wheels.motor4.throttle = 0.48
+    def goStraightVeerLeft(self):
+        self.wheels.motor3.throttle = 0.59
+        self.wheels.motor4.throttle = 0.48
 #         time.sleep(0.5)
-#         wheels.motor3.throttle = 0
-#         wheels.motor4.throttle = 0
+#         self.wheels.motor3.throttle = 0
+#         self.wheels.motor4.throttle = 0
 #         time.sleep(0.5)
 
-    def goBack():
-        wheels.motor3.throttle = -0.75
-        wheels.motor4.throttle = -0.75
+    def goBack(self):
+        self.wheels.motor3.throttle = -0.75
+        self.wheels.motor4.throttle = -0.75
         time.sleep(0.5)
-        wheels.motor3.throttle = 0
-        wheels.motor4.throttle = 0
+        self.wheels.motor3.throttle = 0
+        self.wheels.motor4.throttle = 0
         time.sleep(0.5)
 
-    def turnAround():
-        wheels.motor3.throttle = -0.75
-        wheels.motor4.throttle = -0.75
+    def turnAround(self):
+        self.wheels.motor3.throttle = -0.75
+        self.wheels.motor4.throttle = -0.75
         time.sleep(2)
-        wheels.motor3.throttle = 0
-        wheels.motor4.throttle = 0
+        self.wheels.motor3.throttle = 0
+        self.wheels.motor4.throttle = 0
         time.sleep(0.5)
         
-    def stopMoving():
-        wheels.motor3.throttle = 0
-        wheels.motor4.throttle = 0
+    def stopMoving(self):
+        self.wheels.motor3.throttle = 0
+        self.wheels.motor4.throttle = 0
+            
  
     
-
+if __name__ == '__main__':
+    wheels = robotManuevers()
+    wheels.stopMoving()
 # time.sleep(5)
 #goStraight()
 #goBack()

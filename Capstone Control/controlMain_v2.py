@@ -21,7 +21,7 @@ pygame_running = True
 controller_connected = True
 trigger_turn = False
 keyboard_control = False
-cubeDetection = False
+cubeDetection = True
 data_status = 'GUI'
 simulation = 'lanecontrol'
 
@@ -50,6 +50,15 @@ compass_height = sim_height
 compass_width = sim_width
 compass_x = sim_x
 compass_y = cockpit_y + sim_height
+
+
+# ---------------- Initialize Receiver/Server -----------------
+if server_online:
+    # Make sure IP and PORT match server side IP and PORT
+    IP = '192.168.2.2'
+    PORT = 20001
+    r = Receiver(IP, PORT)
+    r.client.connect()
 
 
 
@@ -128,12 +137,12 @@ if server_online:
     r.client.connect()
 
 
-
 # ---------------- Initialize Variables -----------------
 temp_data = 0
 accel_data = '0'
 gyro_data = '0'
 sonar_data = '0'
+
 front_dist = '20'
 backleft_dist = '5'
 backright_dist = '5'
@@ -267,6 +276,10 @@ while running:
             message += ",ultrasonic,"
             time.sleep(0.2)
 
+        #if c.joystick.get_button(6):
+        #    pass
+            #print('hi')
+
         # Control camera movements using D-pad
         if camera_vert_axis:
             if camera_vert_axis > 0:
@@ -398,8 +411,8 @@ while running:
                 front_dist = sonar_total[0].strip('[').strip(' ')
             if not sonar_total[1].strip(' ') == 'None':
                 right_dist = sonar_total[1].strip(' ')
-            #if not sonar_total[2].strip(' ') == 'None':
-                #backleft_dist = sonar_total[2].strip(' ')
+            if not sonar_total[2].strip(' ') == 'None':
+                backleft_dist = sonar_total[2].strip(' ')
             if not sonar_total[3].strip(' ') == 'None':
                 backright_dist = sonar_total[3].strip(' ')
             if not sonar_total[4].strip(']').strip(' ') == 'None':
@@ -446,9 +459,9 @@ while running:
         #GET USFS DATA
         yaw = r.getYaw(yaw)
 
-
         #GET CUBE SENSOR DATA
         emf_data = r.getEMF(emf_data)
+
         emf_datalist = emf_data.split(',')
         intensity1 = emf_datalist[0]
         intensity2 = emf_datalist[1]
@@ -522,15 +535,16 @@ while running:
 
         
         elif simulation == 'lanecontrol':
-
             distances = [front_dist, left_dist, right_dist, backright_dist, backleft_dist]
-
+            #print(front_dist)
             robot.draw()
             robot.drawBarriers(front_dist, left_dist, right_dist, backright_dist, backleft_dist)
             robot.drawPredictionArrow(turn_prediction)
 
         cockpit.drawThrottles(abs(m1_throttle), abs(m2_throttle))
+
         cockpit.drawIntensity(int(intensity1), int(intensity2))
+
         displayText(cockpit_surface, "M1", font_14, cockpit.width*13/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "M2", font_14, cockpit.width*26/60, cockpit.height/25, white, black )
         displayText(cockpit_surface, "EMF INTENSITY", font_14, cockpit.width*57/60, cockpit.height/25, white, black )
