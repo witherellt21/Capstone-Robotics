@@ -123,7 +123,7 @@ if pygame_running:
 if server_online:
     # Make sure IP and PORT match server side IP and PORT
     IP = '192.168.2.2'
-    PORT = 20000
+    PORT = 20003
     r = Receiver(IP, PORT)
     r.client.connect()
 
@@ -260,32 +260,43 @@ while running:
                 scanner_angle -= 2
                 trigger = "triggerright"
 
-        
+        if c.joystick.get_button(4):
+            message += ",emf,"
+            time.sleep(0.2)
+        if c.joystick.get_button(5):
+            message += ",ultrasonic,"
+            time.sleep(0.2)
 
         # Control camera movements using D-pad
         if camera_vert_axis:
             if camera_vert_axis > 0:
                 #print('Face camera forward')
                 message += ",cameraforward,"
+                time.sleep(0.2)
             else:
                 #print('Face camera backward')
                 message += ",camerabackward,"
+                time.sleep(0.2)
         if camera_horiz_axis:
             if camera_horiz_axis > 0:
                 #print('Face camera right')
                 message += ",cameraright,"
+                time.sleep(0.2)
             else:
                 #print('Face camera left')
                 message += ",cameraleft,"
+                time.sleep(0.2)
         
         #Control arm using A and B button
 
         if c.joystick.get_button(2):
             message += ",armdown,"
             armup = False
+            time.sleep(0.2)
         elif c.joystick.get_button(1):
             message += ",armup,"
             armup = True
+            time.sleep(0.2)
         
         if c.joystick.get_button(0):
             message += ",clawopen,"
@@ -298,8 +309,7 @@ while running:
                 control_mode = 'autonomous'
             else:
                 control_mode = 'user-controlled'
-            print(control_mode)
-            time.sleep(0.2)
+            time.sleep(0.4)
         
 
         # Decrease sensitivity
@@ -395,10 +405,11 @@ while running:
             if not sonar_total[4].strip(']').strip(' ') == 'None':
                 left_dist = sonar_total[4].strip(']').strip(' ')
 
+        '''
         #GET IR PROXIMITY DATA
         ir_data = r.getIR(ir_data)
 
-        '''
+        
         #GET ACCELEROMETER DATA
         accel_data = r.getAccel(accel_data)
         a_datalist = accel_data.split(',')
@@ -433,7 +444,7 @@ while running:
 
             
         #GET USFS DATA
-        #yaw = r.getYaw(yaw)
+        yaw = r.getYaw(yaw)
 
 
         #GET CUBE SENSOR DATA
@@ -474,10 +485,7 @@ while running:
 
         #if the robot receives a none, stop and get new reading
             
-    
-    if cubeDetection:
-        #Code for receiving serial communication from Teensy regarding the intensity of the elctromagnetic field.
-        pass
+
 
     pygame_start = time.time()
     if pygame_running:
@@ -521,8 +529,6 @@ while running:
             robot.drawBarriers(front_dist, left_dist, right_dist, backright_dist, backleft_dist)
             robot.drawPredictionArrow(turn_prediction)
 
-        m1_throttle = 1
-        m2_throttle = 1
         cockpit.drawThrottles(abs(m1_throttle), abs(m2_throttle))
         cockpit.drawIntensity(int(intensity1), int(intensity2))
         displayText(cockpit_surface, "M1", font_14, cockpit.width*13/60, cockpit.height/25, white, black )
@@ -553,6 +559,7 @@ while running:
     pygameList.append(time.time() - pygame_start)
 
     if server_online:
+        
         r.send_msg(message)
     
     message = ','

@@ -393,8 +393,8 @@ class Cockpit():
         pygame.draw.polygon(self.screen, (0, 0, 0), getCoordinates(height, width, x1, y1, 'outline'))
         pygame.draw.polygon(self.screen, (0, 0, 0), getCoordinates(height, width, x2, y2, 'outline'))
 
-        intensity1 = intensity1/400
-        intensity2 = intensity2/400
+        intensity1 = intensity1/260
+        intensity2 = intensity2/260
         
         #pygame.draw.polygon(self.screen, (255, (1-intensity1)*255, 0), getCoordinates(height, width, x1, y1+height/2, 'meter', intensity1))
         #pygame.draw.polygon(self.screen, (255, (1-intensity2)*255, 0), getCoordinates(height, width, x2, y2+height/2, 'meter', intensity2))
