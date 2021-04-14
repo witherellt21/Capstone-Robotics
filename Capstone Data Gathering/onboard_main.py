@@ -20,6 +20,7 @@ import math
 from turnFunctions import robotManuevers as rm
 
 
+# ---------------- Toggle Features -----------------
 sonars_activated = False 
 imu_activated = False
 ir_sensor_activated = False
@@ -101,6 +102,7 @@ if cubesensor_active:
     ser = serial.Serial(port='/dev/ttyS0', baudrate = 9600, parity = serial.PARITY_NONE, stopbits = serial.STOPBITS_ONE, bytesize = serial.EIGHTBITS, timeout =1)
 
 
+
 # ---------------- Initialize USFS -----------------
 yaw = '0'
 
@@ -164,11 +166,11 @@ def turn(direction, angle, start_pos):
             curr_orientation = last_value
         else:
             last_value = curr_orientation
-        #print(curr_orientation)
-    #print(abs(curr_orientation - start_pos))
+
     robot.motor3.throttle = 0
     robot.motor4.throttle = 0
     time.sleep(1)
+    
 '''
 def alignRight(curr_orientation):
     last_value = curr_orientation
@@ -276,15 +278,6 @@ while running:
                 #control = 'stop'
 
         distances = [front_dist, right_dist, backleft_dist, backright_dist , left_dist]
-        #print(distances)
-        
-        '''
-        for i in range(len(distances)):
-            if distances[i] != None:
-                distances[i] = round(float(distances[i]),2)
-                
-        '''#
-        #print(distances)
         
         
     if imu_activated:
@@ -316,11 +309,8 @@ while running:
     
     if autonomous:
         sonars_activated = True
-    
-        yaw = getYaw(yaw)
-        #while True:
-            #yaw = getYaw(yaw)
-            #print(yaw)
+        usfs_active = True
+
         '''
         difference = yaw - 263
         
@@ -336,8 +326,6 @@ while running:
         
         if turnCount == 0:
             if front_dist >= 7:
-                #print("forward")
-                
                 goStraight()
             if front_dist<7 and left_dist<40 and right_dist>20:
                 stopMoving()
@@ -348,11 +336,9 @@ while running:
                         break
                     last_yaw = yaw
                 turn("right", 86, yaw)
-                #print("right")
                 turnCount+=1
         elif turnCount == 1:
             if front_dist > 11:
-                #print("forward")
                 goStraight()
             if front_dist <11 and left_dist>20:
                 stopMoving()
@@ -363,12 +349,10 @@ while running:
                         break
                     last_yaw = yaw
                 turn("left", 86, yaw)
-                #print("left")
                 turnCount+=1
                 
         elif turnCount == 2:
             if front_dist>9:
-                #print("forward")
                 goStraight()
             if front_dist<9 and right_dist>10:
                 stopMoving()
@@ -379,11 +363,9 @@ while running:
                         break
                     last_yaw = yaw
                 turn("right", 86, yaw)
-                #print("right")
                 turnCount+=1
         elif turnCount ==3:
             if front_dist>15:
-                #print("forward")
                 goStraight()
             if front_dist<15 and left_dist>25:
                 stopMoving()
@@ -394,65 +376,14 @@ while running:
                         break
                     last_yaw = yaw
                 turn("left", 88, yaw)
-                #print("left")
                 turnCount += 1
         elif turnCount==4:
             if front_dist>5:
                 goStraight()
-                #print("forward")
             else:
                 stopMoving()
                 autonomous = False
-        '''
-        turn_auto = rm(robot)
-        if turnCount == 0:
-            print('in auto')
-            if front_dist > 9:
-                print("forward")
                 
-                turn_auto.goStraight()
-            if front_dist<9 and left_dist<40 and right_dist>20:
-                #turn_auto.turnRight90()
-                print("right")
-                turnCount+=1
-        elif turnCount == 1:
-            if front_dist > 12:
-                print("forward")
-                turn_auto.goStraight()
-            if front_dist <12 and left_dist>20:
-                turn_auto.turnLeft()
-                print("left")
-                turnCount+=1
-                
-        elif turnCount == 2:
-            if front_dist>9:
-                print("forward")
-                turn_auto.goStraight()
-            if front_dist<9 and right_dist>10:
-                turn_auto.turnRight90()
-                print("right")
-                turnCount+=1
-        elif turnCount ==3:
-            if front_dist>12:
-                print("forward")
-                turn_auto.goStraight()
-            if front_dist<12 and left_dist>25:
-                turn_auto.overturnLefti()
-                print("left")
-                turnCount += 1
-        elif turnCount==4:
-            if front_dist>5:
-                turn_auto.goStraight()
-                print("forward")
-            else:
-                turn_auto.stopMoving()
-                break
-        '''
-                
-        
-            
-
-    #time.sleep(3)
     if server_online:
         # If client disconnects from server, reconnect
         if server.disconnect_counter > 0:
@@ -508,7 +439,6 @@ while running:
         '''
         if datalist:
             for data in datalist:
-                #print(data)
                 if not autonomous:
                     if 'm1' in data:
                         try:
@@ -521,7 +451,6 @@ while running:
                         except:
                             pass                        
                 if data == 'cameraforward':
-                    #print('here')
                     c.FaceForward()
                 elif data == 'camerabackward':
                     c.FaceBackward()
